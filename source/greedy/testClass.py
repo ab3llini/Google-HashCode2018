@@ -30,7 +30,7 @@ class RealElementList(ElementList):
 a = RealElementList([RealElement(7), RealElement(2), RealElement(1), RealElement(0), RealElement(10), RealElement(4)])
 b = a.clone()
 a.sort()
-a.insert(RealElement(3))
+a.insert(5)
 for elem in a.get_elements():
     print(elem.get_value())
 for elem in b.get_elements():

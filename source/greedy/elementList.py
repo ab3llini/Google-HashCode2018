@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from element import Element
-from collections import Iterable, Iterator
+from collections import Iterable
+import sys
 
 
 class ElementList(Iterable):
@@ -20,8 +21,8 @@ class ElementList(Iterable):
         """
         if type(elements) is not list:
             raise TypeError
-        if issubclass(elements[0], Element):
-            print("elements are of type", type(elements[0]))
+        if not issubclass(type(elements[0]), Element):
+            sys.stderr.write("element type is not %s, found %s\n" % (Element, type(elements[0])))
             raise TypeError
 
         self.__elements = elements
@@ -75,8 +76,8 @@ class ElementList(Iterable):
         :param mode: is the function type, 'RECURSIVE' for search complexity of O(log(n))
                      'ITERATIVE' for search complexity of O(n)
         """
-        if issubclass(element, Element):
-            print("element type is", type(element))
+        if not issubclass(type(element), Element):
+            sys.stderr.write("element type is not %s, found %s\n" % (Element, type(element)))
             raise TypeError
         if not self.__sorted:
             self.__elements.append(element)
