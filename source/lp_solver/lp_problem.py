@@ -1,4 +1,5 @@
 from enum import Enum
+import numpy as np
 
 ROW = 0
 COL = 1

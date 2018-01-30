@@ -1,4 +1,3 @@
-import numpy as np
 import cudamat as cm
 from lp_solver.lp_problem import *
 
@@ -22,12 +21,12 @@ b = matrix_builder(b, cm.CUDAMatrix)
 # Set signs, in this case all constraints have the same sign
 A_sign = [LPSign.LE] * A.shape[ROW]
 
-try:
-    p = LPProblem(LPObjective.MAXIMIZE, c, A, b, A_sign)
-    d = p.get_dual()
-    print(p)
-    print(d)
+#try:
+p = LPProblem(LPObjective.MAXIMIZE, c, A, b, A_sign)
+d = p.get_dual()
+print(p)
+print(d)
 
 
-except Exception as e:
-    print("Oops, there is a problem: %s" % e)
+#except Exception as e:
+#print("Oops, there is a problem: %s" % e)
