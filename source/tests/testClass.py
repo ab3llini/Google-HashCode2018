@@ -1,6 +1,6 @@
-from element import Element
-from elementList import ElementList
-from greedy import greedy
+from source.greedy.element import Element
+from source.greedy.elementList import ElementList
+from source.greedy.greedy import greedy
 
 
 class RealElement(Element):
