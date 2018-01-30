@@ -5,26 +5,26 @@ import time
 '''Please tune matrix size in order not to get an out of memory error.'''
 '''The following setup runs fine on 32GB of RAM and a GTX 1080Ti'''
 
-
-
-
 H1 = 5000
 W1 = 8000
 W2 = 9000
 H2 = W1
+
+FILL1 = 62.04984
+FILL2 = 21.23344
 
 
 def start():
 
     print("CPU Benchmark starting..")
 
-    print("Generating matrix A %dx%d with all values = to 5.5.." % (H1, W1))
+    print("Generating matrix A %dx%d with all values set to %f.." % (H1, W1, FILL1))
 
-    A = np.matrix(np.full((H1, W1), 5.5))
+    A = np.matrix(np.full((H1, W1), FILL1))
 
-    print("Generating matrix B %dx%d with all values = to 5.5.." % (H2, W2))
+    print("Generating matrix B %dx%d with all values set to %f.." % (H2, W2, FILL2))
 
-    B = np.matrix(np.full((H2, W2), 7.5))
+    B = np.matrix(np.full((H2, W2), FILL2))
 
     print("Performing A * B")
 
@@ -60,6 +60,7 @@ def start():
 
     print("GPU Benchmark done >>> %.10f seconds" % (end - begin))
 
-    print("Benchmark done >>> GPU was %d times faster than CPU" % ((cpu / gpu) * 100))
+    print("Benchmark done >>> GPU was %.2f times faster than CPU" % (cpu / gpu))
+
 
 start()
