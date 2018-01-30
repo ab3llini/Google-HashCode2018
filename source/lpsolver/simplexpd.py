@@ -6,6 +6,13 @@ ROW = 0
 COL = 1
 
 
+def matrix_builder(matrix, cuda_func=None):
+    m = np.array(matrix)
+    if cuda_func is not None:
+        m = cuda_func(m);
+    return m
+
+
 class LPException(Exception):
     """TODO"""
 
@@ -19,22 +26,12 @@ class LPObjective(Enum):
     MINIMIZE = "min"
     MAXIMIZE = "max"
 
+
 class LPSign(Enum):
     GE = ">="
     LE = "<="
     EQ = "="
     FREE = "<>"
-
-
-# Utility to dynamically create representation of matrix for cpu using numpy or gpu using cudamat
-class LPMatrixBuilder:
-
-    def __init__(self, host=LPHost.CPU):
-        self.host = host;
-
-    def build(self, matrix):
-        m = np.array(matrix)
-        return m if self.host == LPHost.CPU else cm.CUDAMatrix(m)
 
 
 class LPProblem:
@@ -133,7 +130,7 @@ class LPProblem:
                 self.var_names,
                 i + 1,
                 "free" if sign == LPSign.FREE else ("%s 0" % sign.value),
-                ", " if (len(self.var_signs) - 1) != i else ""
+                ", " if (len(self.var_signs) - 1) != i else "\n"
             )
         return x
 
@@ -143,11 +140,9 @@ A = [[4, 5], [6, 8], [3, 5]]
 b = [[5], [7], [4]]
 
 
-builder = LPMatrixBuilder(LPHost.CPU)
-
-c = builder.build(c)
-A = builder.build(A)
-b = builder.build(b)
+c = matrix_builder(c)
+A = matrix_builder(A)
+b = matrix_builder(b)
 
 # Set signs, in this case all constraints and variables have the same sign
 A_sign = [LPSign.LE] * A.shape[ROW]
