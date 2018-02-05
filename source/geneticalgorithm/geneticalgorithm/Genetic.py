@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 from source.geneticalgorithm.geneticalgorithm.Chromosome import Chromosome
 from source.geneticalgorithm.geneticalgorithm.Crossover import Crossover
 from source.geneticalgorithm.geneticalgorithm.Elitism import Elitism
@@ -12,19 +14,20 @@ class Genetic:
     def __init__(self, pop: Population, elitism: Elitism, selmethod: SelectionMethod, endcondition: EndCondition, crossover: Crossover, mutation: Mutation):
         self.pop = pop
         self.selmethod = selmethod
-        self.endcondition=endcondition
+        self.endcondition = endcondition
         self.mutation=mutation
-        self.crossover=crossover
-        self.elitism=elitism
-        self.gen=0
+        self.crossover = crossover
+        self.elitism = elitism
+        self.gen = 0
 
     def start(self):
         """Intructions executed before starting the loop."""
         self.pop.sort()
 
+    @abstractmethod
     def stop(self):
         """Intructions executed before after the termination. Must be defined by the user."""
-        pass
+        raise NotImplementedError
 
     def execute(self) -> Chromosome:
         """This is what must be called to execute the genetic algorithm with the parameters specified when the object
@@ -60,7 +63,6 @@ class Genetic:
             newgen.chromosomes.append(offspring)
         return newgen
 
-
     def loop(self) -> Chromosome:
         """This is the loop of the algorithm."""
         while True:
@@ -71,7 +73,7 @@ class Genetic:
             newgen = self.applyElitism(Population([]))
             """Generated new offspring a certain number of times, to have a new generation as numerous as the 
             previous one."""
-            while(newgen.getDimension() < self.pop.getDimension()):
+            while newgen.getDimension() < self.pop.getDimension():
                 newgen = self.generateOffSpring(newgen)
 
             """Sort the new generation by fitness, decreasing order."""
@@ -81,5 +83,3 @@ class Genetic:
             """Uses the new generation as current population"""
             self.pop = newgen
             self.gen += 1
-
-
