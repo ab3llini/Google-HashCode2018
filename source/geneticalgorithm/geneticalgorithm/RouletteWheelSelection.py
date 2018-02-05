@@ -6,7 +6,7 @@ from source.geneticalgorithm.geneticalgorithm.SelectionMethod import SelectionMe
 
 class RouletteWheelSelection(SelectionMethod):
 
-    def selectFrom(self, population: Population) -> Chromosome:
+    def selectFrom(self, population: Population, gen: int) -> Chromosome:
         """returns an element of the population according to the hereby defined method, that is that
         each Chromosome has a probability to be chosen proportional to its fitness, compared to others'."""
         sum = .0

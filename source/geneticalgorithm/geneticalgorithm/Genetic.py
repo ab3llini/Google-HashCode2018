@@ -16,6 +16,7 @@ class Genetic:
         self.mutation=mutation
         self.crossover=crossover
         self.elitism=elitism
+        self.gen=0
 
     def start(self):
         """Intructions executed before starting the loop."""
@@ -48,10 +49,10 @@ class Genetic:
          - performs crossover with the probability defined when the object was created;
          - performs mutation with the probability defined when the object was created.
          Returns the new offspring. If no offspring was created, returns the first parent (eventually mutated)"""
-        parent1 = self.pop.select(self.selmethod)
-        parent2 = self.pop.select(self.selmethod)
+        parent1 = self.pop.select(self.selmethod, self.gen)
+        parent2 = self.pop.select(self.selmethod, self.gen)
         while parent1 == parent2:
-            parent2 = self.pop.select(self.selmethod)
+            parent2 = self.pop.select(self.selmethod, self.gen)
         offspring= self.crossover.crossover(parent1,parent2)
         offspring=self.mutation.mutation(offspring)
         if(offspring.feasible()):
@@ -79,5 +80,6 @@ class Genetic:
             self.endcondition.update()
             """Uses the new generation as current population"""
             self.pop = newgen
+            self.gen += 1
 
 

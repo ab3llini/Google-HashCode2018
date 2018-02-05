@@ -12,9 +12,9 @@ class Population:
         """Initializes with a list of chromosomes. All the generation will be of the same dimension"""
         self.chromosomes = chromoList
 
-    def select(self, selMethod: SelectionMethod):
+    def select(self, selMethod: SelectionMethod, gen: int):
         """Selects a chromosome according to the SelectionMethod given as parameter"""
-        return selMethod.selectFrom(self)
+        return selMethod.selectFrom(self, gen)
 
     def sort(self):
         """Sorts the population by fitness, decreasing order"""
