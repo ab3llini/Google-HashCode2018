@@ -1,9 +1,21 @@
 from enum import Enum
 import numpy as np
 
-ROW = 0
-COL = 1
 
+# Global constant definitions
+kRowComponent = 0
+kColComponent = 1
+kCostRef = "c"
+kConstraintsRef = "A"
+kConstantRef = "b"
+
+
+# Auxiliary functions
+def init_signs_to(sign, matrix):
+    return [sign] * matrix.shape[kRowComponent]
+
+
+# Objects declaration
 class LPObjective(Enum):
     MINIMIZE = "min"
     MAXIMIZE = "max"
@@ -18,29 +30,35 @@ class LPSign(Enum):
 
 class LPProblem:
 
-    def __init__(self, objective, cost_v, constraints_v, constant_v, constraints_signs, var_signs=None, var_names="x"):
+    """Input needs to be a tuple (literally) of elements of type: c, b, A"""
+    def __init__(self, objective, input_v, constraints_signs, var_signs=None, var_names="x"):
+
+        self.obj = objective
+        self.c = input_v["c"]
+        self.A = input_v["A"]
+        self.b = input_v["b"]
 
         if var_signs is None:
-            var_signs = [LPSign.FREE] * constraints_v.shape[COL]
+            var_signs = [LPSign.FREE] * self.A.shape[kColComponent]
 
-        if cost_v.shape[ROW] > 1:
-            raise Exception("Incompatible cost vector: cost vector has %s rows instead of 1" % (cost_v.shape[ROW]))
+        if self.c.shape[kRowComponent] > 1:
+            raise Exception("Incompatible cost vector: cost vector has %s rows instead of 1" % (self.c.shape[kRowComponent]))
 
-        if cost_v.shape[COL] != constraints_v.shape[COL]:
+        if self.c.shape[kColComponent] != self.A.shape[kColComponent]:
             raise Exception("Incompatible constraint matrix: the cost vector has %s cols while the constraint matrix "
-                            "has %s cols" % (cost_v.shape[COL], constraints_v.shape[COL]))
+                            "has %s cols" % (self.c.shape[kColComponent], self.A.shape[kColComponent]))
 
-        if constraints_v.shape[ROW] != constant_v.shape[ROW] or constant_v.shape[COL] > 1:
+        if self.A.shape[kRowComponent] != self.b.shape[kRowComponent] or self.b.shape[kColComponent] > 1:
             raise Exception("Incompatible constant vector: the constant vector has %s rows while the constraint matrix "
-                            "has %s rows" % (constant_v.shape[ROW], constraints_v.shape[ROW]))
+                            "has %s rows" % (self.b.shape[kRowComponent], self.A.shape[kRowComponent]))
 
-        if len(constraints_signs) != constraints_v.shape[ROW]:
+        if len(constraints_signs) != self.A.shape[kRowComponent]:
             raise Exception("Wrong sign number for constraints:"
-                            "have %s, expected %s" % (len(constraints_signs), constraints_v.shape[ROW]))
+                            "have %s, expected %s" % (len(constraints_signs), self.A.shape[kRowComponent]))
 
-        if len(var_signs) != constraints_v.shape[COL]:
+        if len(var_signs) != self.A.shape[kColComponent]:
             raise Exception("Wrong sign number for variables:"
-                            "have %s, expected %s" % (len(constraints_signs), constraints_v.shape[COL]))
+                            "have %s, expected %s" % (len(constraints_signs), self.A.shape[kColComponent]))
 
         for sign in constraints_signs:
             if sign == LPSign.FREE:
@@ -50,13 +68,10 @@ class LPProblem:
             if sign == LPSign.EQ:
                 raise Exception("A variable sign cannot be equal")
 
-        self.obj = objective
-        self.c = cost_v
-        self.A = constraints_v
-        self.b = constant_v
         self.A_sign = constraints_signs
         self.var_signs = var_signs
         self.var_names = var_names
+
 
     def get_dual(self, var_name="y"):
 
@@ -64,9 +79,11 @@ class LPProblem:
 
         return LPProblem(
             LPObjective.MINIMIZE if self.obj == LPObjective.MAXIMIZE else LPObjective.MAXIMIZE,
-            self.b.transpose(),
-            self.A.transpose(),
-            self.c.transpose(),
+            {
+                kCostRef: self.b.transpose(),
+                kConstraintsRef: self.A.transpose(),
+                kConstantRef: self.c.transpose()
+            },
             dual_signs["A"],
             dual_signs["VAR"],
             var_name
@@ -118,3 +135,5 @@ class LPProblem:
                 ", " if (len(self.var_signs) - 1) != i else "\n"
             )
         return x
+
+
