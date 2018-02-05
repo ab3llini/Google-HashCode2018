@@ -1,7 +1,7 @@
 import random
-from geneticalgorithm.Chromosome import Chromosome
-from geneticalgorithm.Population import Population
-from geneticalgorithm.SelectionMethod import SelectionMethod
+from source.geneticalgorithm.geneticalgorithm.Chromosome import Chromosome
+from source.geneticalgorithm.geneticalgorithm.Population import Population
+from source.geneticalgorithm.geneticalgorithm.SelectionMethod import SelectionMethod
 
 
 class RankSelection(SelectionMethod):

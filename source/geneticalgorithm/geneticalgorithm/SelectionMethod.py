@@ -1,4 +1,4 @@
-from geneticalgorithm.Chromosome import Chromosome
+from source.geneticalgorithm.geneticalgorithm.Chromosome import Chromosome
 
 
 

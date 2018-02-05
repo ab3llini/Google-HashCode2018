@@ -1,4 +1,4 @@
-from geneticalgorithm.EndCondition import EndCondition
+from source.geneticalgorithm.geneticalgorithm.EndCondition import EndCondition
 
 
 class EpochsEndCondition(EndCondition):

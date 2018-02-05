@@ -1,12 +1,11 @@
-from geneticalgorithm.Crossover import Crossover
-from geneticalgorithm.Elitism import Elitism
-from geneticalgorithm.EpochsEndCondition import EpochsEndCondition
-from geneticalgorithm.Genetic import Genetic
-from geneticalgorithm.Mutation import Mutation
-from geneticalgorithm.Population import Population
-from geneticalgorithm.RouletteWheelSelection import RouletteWheelSelection
-from geneticalgorithm.RankSelection import RankSelection
-from testgeneticalgorithm.MyChromosome import MyChromosome
+from source.geneticalgorithm.geneticalgorithm.Crossover import Crossover
+from source.geneticalgorithm.geneticalgorithm.Elitism import Elitism
+from source.geneticalgorithm.geneticalgorithm.EpochsEndCondition import EpochsEndCondition
+from source.geneticalgorithm.geneticalgorithm.Genetic import Genetic
+from source.geneticalgorithm.geneticalgorithm.Mutation import Mutation
+from source.geneticalgorithm.geneticalgorithm.Population import Population
+from source.geneticalgorithm.geneticalgorithm.RankSelection import RankSelection
+from source.geneticalgorithm.testgeneticalgorithm.MyChromosome import MyChromosome
 
 
 class MyGenetic(Genetic):

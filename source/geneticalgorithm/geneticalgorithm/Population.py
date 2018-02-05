@@ -1,5 +1,5 @@
-from geneticalgorithm import SelectionMethod
-from geneticalgorithm.Chromosome import Chromosome
+from source.geneticalgorithm.geneticalgorithm import SelectionMethod
+from source.geneticalgorithm.geneticalgorithm.Chromosome import Chromosome
 
 
 def getfitness(c:Chromosome):

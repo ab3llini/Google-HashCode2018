@@ -1,10 +1,10 @@
-from geneticalgorithm.Chromosome import Chromosome
-from geneticalgorithm.Crossover import Crossover
-from geneticalgorithm.Elitism import Elitism
-from geneticalgorithm.EndCondition import EndCondition
-from geneticalgorithm.Mutation import Mutation
-from geneticalgorithm.Population import Population
-from geneticalgorithm.SelectionMethod import SelectionMethod
+from source.geneticalgorithm.geneticalgorithm.Chromosome import Chromosome
+from source.geneticalgorithm.geneticalgorithm.Crossover import Crossover
+from source.geneticalgorithm.geneticalgorithm.Elitism import Elitism
+from source.geneticalgorithm.geneticalgorithm.EndCondition import EndCondition
+from source.geneticalgorithm.geneticalgorithm.Mutation import Mutation
+from source.geneticalgorithm.geneticalgorithm.Population import Population
+from source.geneticalgorithm.geneticalgorithm.SelectionMethod import SelectionMethod
 
 
 class Genetic:
