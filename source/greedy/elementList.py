@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from element import Element
+from greedy.element import Element
 from collections import Iterable
 import sys
 
@@ -13,17 +13,16 @@ class ElementList(Iterable):
     # This should be a list of type Element
     __elements = []
 
-    def __init__(self, elements):
+    def __init__(self, elements: list):
         """
         Create a list of elements of type Element
         :param elements: a list of object of type Element
         :raise TypeError if elements is not a list of Element
         """
-        if type(elements) is not list:
-            raise TypeError
-        if not issubclass(type(elements[0]), Element):
-            sys.stderr.write("element type is not %s, found %s\n" % (Element, type(elements[0])))
-            raise TypeError
+        # if not isinstance(elements[0], Element):
+        #     print(issubclass(type(elements[0]), Element))
+        #     sys.stderr.write("element type is not %s, found %s\n" % (Element, type(elements[0])))
+        #     raise TypeError
 
         self.__elements = elements
         self.__sorted = False
@@ -76,9 +75,9 @@ class ElementList(Iterable):
         :param mode: is the function type, 'RECURSIVE' for search complexity of O(log(n))
                      'ITERATIVE' for search complexity of O(n)
         """
-        if not issubclass(type(element), Element):
-            sys.stderr.write("element type is not %s, found %s\n" % (Element, type(element)))
-            raise TypeError
+        # if not issubclass(type(element), Element):
+        #    sys.stderr.write("element type is not %s, found %s\n" % (Element, type(element)))
+        #    raise TypeError
         if not self.__sorted:
             self.__elements.append(element)
         elif mode is 'RECURSIVE':
@@ -127,14 +126,4 @@ class ElementList(Iterable):
 
     def __iter__(self):
         self.__iter_index = 0
-        return self
-
-    def next(self):
-        if self.__has_next():
-            self.__iter_index = self.__iter_index + 1
-            return self.__elements[self.__iter_index - 1]
-        else:
-            raise StopIteration
-
-    def __has_next(self):
-        return self.__iter_index < len(self.__elements)
+        return iter(self.__elements)

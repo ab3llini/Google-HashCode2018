@@ -1,4 +1,4 @@
-from elementList import ElementList
+from greedy.elementList import ElementList
 
 
 def greedy(element_list):
