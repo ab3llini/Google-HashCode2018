@@ -2,12 +2,15 @@ import random
 
 from source.geneticalgorithm.Population import Population
 
+"""**************************END CONDITIONS****************************"""
 
 def epochsend(gen, maxgen):
     """This is the condition checked at the beginning of each loop of the algorithm.
             If True, the algorithm will stop and return the best chromosome"""
     return gen == maxgen
 
+
+"""**********************SELECTION METHODS********************************"""
 
 def rankselection(population):
     """returns an element of the population according to the hereby defined method, that is that
@@ -39,13 +42,15 @@ def roulettewheelselection(population: Population):
     return population.chromosomes[len(population.chromosomes) - 1]
 
 
+"""*************************ALGORITHM STRUCTURE*****************************"""
+
 def start(pop):
     """Intructions executed before starting the loop."""
     pop.sort()
 
 
 def mutation(chromosome, probability):
-    """Does mutation with a probability that was given when the object was created"""
+    """Does mutation with a probability that was given when the algorithm was started"""
     numb = random.uniform(0,1)
     if numb < probability :
         return chromosome.mutation()
@@ -53,7 +58,7 @@ def mutation(chromosome, probability):
 
 
 def crossover(parent1, parent2, probability):
-    """Does crossover with a probability that was given when the object was created"""
+    """Does crossover with a probability that was given when the algorithm was started"""
     numb = random.uniform(0, 1)
     if numb < probability:
         return parent1.crossover(parent2)
@@ -61,8 +66,8 @@ def crossover(parent1, parent2, probability):
 
 
 def execute(list, elitism, selmethod, endcondition, crossoverprob, mutationprob, stop, generations):
-    """This is what must be called to execute the genetic algorithm with the parameters specified when the object
-    was created. Returns, at the end, the best chromosome"""
+    """This is what must be called to execute the genetic algorithm with the parameters specified at the moment.
+     Returns, at the end, the best chromosome"""
     pop = Population(list)
     start(pop)
     result = loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, generations)
@@ -81,10 +86,10 @@ def applyElitism(newgen, pop, elitism):
 
 
 def generateOffSpring(newgen, pop, selmethod, crossoverprob, mutationprob):
-    """Used by the loop. It generated new offspring, that means that it selects two parents basing on the selection
-     method that was defined when this object was created and:
-     - performs crossover with the probability defined when the object was created;
-     - performs mutation with the probability defined when the object was created.
+    """Used by the loop. It generates new offspring, that means that it selects two parents basing on the selection
+     method that was defined when the algorithm was started and:
+     - performs crossover with the probability defined when the algorithm was started;
+     - performs mutation with the probability defined when the algorithm was started.
      Returns the new offspring. If no offspring was created, returns the first parent (eventually mutated)"""
     parent1 = selmethod(pop)
     parent2 = selmethod(pop)
