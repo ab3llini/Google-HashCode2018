@@ -64,21 +64,6 @@ class MyChromosome(Chromosome):
         i = self.positions[pos1]
         self.positions[pos1] = self.positions[pos2]
         self.positions[pos2] = i
-        pos1 = math.floor(random.uniform(0, len(self.positions)))
-        pos2 = math.floor(random.uniform(0, len(self.positions)))
-        i = self.positions[pos1]
-        self.positions[pos1] = self.positions[pos2]
-        self.positions[pos2] = i
-        pos1 = math.floor(random.uniform(0, len(self.positions)))
-        pos2 = math.floor(random.uniform(0, len(self.positions)))
-        i = self.positions[pos1]
-        self.positions[pos1] = self.positions[pos2]
-        self.positions[pos2] = i
-        pos1 = math.floor(random.uniform(0, len(self.positions)))
-        pos2 = math.floor(random.uniform(0, len(self.positions)))
-        i = self.positions[pos1]
-        self.positions[pos1] = self.positions[pos2]
-        self.positions[pos2] = i
         return self
 
     def feasible(self):
