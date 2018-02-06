@@ -4,10 +4,20 @@ from source.geneticalgorithm.Population import Population
 
 """**************************END CONDITIONS****************************"""
 
-def epochsend(gen, maxgen):
+def epochsend(gen, maxgen, fit, maxfit):
     """This is the condition checked at the beginning of each loop of the algorithm.
             If True, the algorithm will stop and return the best chromosome"""
     return gen == maxgen
+
+def fitend(gen, maxgen, fit, maxfit):
+    """This is the condition checked at the beginning of each loop of the algorithm.
+            If True, the algorithm will stop and return the best chromosome"""
+    return fit == maxfit
+
+def fitepochsend(gen, maxgen, fit, maxfit):
+    """This is the condition checked at the beginning of each loop of the algorithm.
+            If True, the algorithm will stop and return the best chromosome"""
+    return fit == maxfit or gen==maxgen
 
 
 """**********************SELECTION METHODS********************************"""
@@ -65,12 +75,12 @@ def crossover(parent1, parent2, probability):
     return parent1
 
 
-def execute(list, elitism, selmethod, endcondition, crossoverprob, mutationprob, stop, generations):
+def execute(list, elitism, selmethod, endcondition, crossoverprob, mutationprob, stop, generations, maxfitness):
     """This is what must be called to execute the genetic algorithm with the parameters specified at the moment.
      Returns, at the end, the best chromosome"""
     pop = Population(list)
     start(pop)
-    return loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, generations, stop)
+    return loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, generations, stop, maxfitness)
 
 
 def applyElitism(newgen, pop, elitism):
@@ -101,12 +111,12 @@ def generateOffSpring(newgen, pop, selmethod, crossoverprob, mutationprob):
     return newgen
 
 
-def loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, generations, stop):
+def loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, generations, stop, maxfitness):
     """This is the loop of the algorithm."""
     gen=0
     while True:
         """If condition is satisfied, it stops and returns the best chromosome."""
-        if endcondition(gen,generations):
+        if endcondition(gen,generations,pop.getbest().getfitness(),maxfitness):
             stop(pop)
             return pop.getbest()
         """Applies elitism to copy a certain number of chromosomes to the new generation, 'newgen' """

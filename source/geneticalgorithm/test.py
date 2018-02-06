@@ -19,7 +19,7 @@ for i in range (0,50):
 
 start = time.time()
 
-result=lib.execute(list,5,lib.roulettewheelselection,lib.epochsend,0.7,0.1,stop,1000)
+result=lib.execute(list,5,lib.roulettewheelselection,lib.epochsend,0.999,0.2,stop,35000)
 end = time.time()
 
 print((end-start)/60)
