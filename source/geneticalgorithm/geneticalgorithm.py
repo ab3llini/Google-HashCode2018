@@ -70,9 +70,7 @@ def execute(list, elitism, selmethod, endcondition, crossoverprob, mutationprob,
      Returns, at the end, the best chromosome"""
     pop = Population(list)
     start(pop)
-    result = loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, generations)
-    stop(pop)
-    return result
+    return loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, generations, stop)
 
 
 def applyElitism(newgen, pop, elitism):
@@ -103,12 +101,13 @@ def generateOffSpring(newgen, pop, selmethod, crossoverprob, mutationprob):
     return newgen
 
 
-def loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, generations):
+def loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, generations, stop):
     """This is the loop of the algorithm."""
     gen=0
     while True:
         """If condition is satisfied, it stops and returns the best chromosome."""
         if endcondition(gen,generations):
+            stop(pop)
             return pop.getbest()
         """Applies elitism to copy a certain number of chromosomes to the new generation, 'newgen' """
         newgen = applyElitism(Population([]), pop, elitism)
