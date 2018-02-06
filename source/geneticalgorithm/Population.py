@@ -1,5 +1,4 @@
-from source.geneticalgorithm.geneticalgorithm import SelectionMethod
-from source.geneticalgorithm.geneticalgorithm.Chromosome import Chromosome
+from source.geneticalgorithm.Chromosome import Chromosome
 
 
 def getfitness(c:Chromosome):
@@ -11,10 +10,6 @@ class Population:
     def __init__(self, chromoList: list):
         """Initializes with a list of chromosomes. All the generation will be of the same dimension"""
         self.chromosomes = chromoList
-
-    def select(self, selMethod: SelectionMethod, gen: int):
-        """Selects a chromosome according to the SelectionMethod given as parameter"""
-        return selMethod.selectFrom(self, gen)
 
     def sort(self):
         """Sorts the population by fitness, decreasing order"""

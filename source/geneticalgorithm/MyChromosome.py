@@ -2,7 +2,7 @@ import random
 
 import math
 
-from source.geneticalgorithm.geneticalgorithm.Chromosome import Chromosome
+from source.geneticalgorithm.Chromosome import Chromosome
 
 
 class MyChromosome(Chromosome):
@@ -61,9 +61,24 @@ class MyChromosome(Chromosome):
     def mutation(self):
         pos1 = math.floor(random.uniform(0, len(self.positions)))
         pos2 = math.floor(random.uniform(0, len(self.positions)))
-        i=self.positions[pos1]
-        self.positions[pos1]=self.positions[pos2]
-        self.positions[pos2]=i
+        i = self.positions[pos1]
+        self.positions[pos1] = self.positions[pos2]
+        self.positions[pos2] = i
+        pos1 = math.floor(random.uniform(0, len(self.positions)))
+        pos2 = math.floor(random.uniform(0, len(self.positions)))
+        i = self.positions[pos1]
+        self.positions[pos1] = self.positions[pos2]
+        self.positions[pos2] = i
+        pos1 = math.floor(random.uniform(0, len(self.positions)))
+        pos2 = math.floor(random.uniform(0, len(self.positions)))
+        i = self.positions[pos1]
+        self.positions[pos1] = self.positions[pos2]
+        self.positions[pos2] = i
+        pos1 = math.floor(random.uniform(0, len(self.positions)))
+        pos2 = math.floor(random.uniform(0, len(self.positions)))
+        i = self.positions[pos1]
+        self.positions[pos1] = self.positions[pos2]
+        self.positions[pos2] = i
         return self
 
     def feasible(self):

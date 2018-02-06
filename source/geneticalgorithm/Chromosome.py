@@ -1,6 +1,3 @@
-from abc import abstractmethod
-
-
 class Chromosome:
 
     def __init__(self):
@@ -16,30 +13,25 @@ class Chromosome:
         self.fitness=self.calculatefitness()
         return self.fitness
 
-    @abstractmethod
     def calculatefitness(self):
         """fitness MUST be positive in order to work properly with all selection methods
         furthermore, you should project a fitness function that needs to be maximized"""
-        raise NotImplementedError
+        pass
 
-    @abstractmethod
     def crossover(self, parent2):
         """MUST return a Chromosome that is crossover of this and parent2.
         Basically this is where you define crossover"""
         pass
 
-    @abstractmethod
     def mutation(self):
         """MUST return a Chromosome that is mutation of this.
         Basically this is where you define mutation"""
-        raise NotImplementedError
+        pass
 
-    @abstractmethod
     def feasible(self):
         """MUST return True if and ony if this is a feasible solution for the problem."""
-        raise NotImplementedError
+        pass
 
-    @abstractmethod
     def randomize(self):
         """Transforms this chromosome into a random solution. Returns northing"""
-        raise NotImplementedError
+        pass
