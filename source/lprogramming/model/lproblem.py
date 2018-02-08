@@ -8,10 +8,11 @@ kColComponent = 1
 kCostRef = "c"
 kConstraintsRef = "A"
 kConstantRef = "b"
+kStartRef = "start"
 
 
 # Auxiliary functions
-def init_signs_to(sign, matrix):
+def init_constraints_signs_to(sign, matrix):
     return [sign] * matrix.shape[kRowComponent]
 
 
