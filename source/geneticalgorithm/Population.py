@@ -1,19 +1,19 @@
 from source.geneticalgorithm.Chromosome import Chromosome
 
 
-def getfitness(c:Chromosome):
+def getfitness(c: Chromosome):
     return c.getfitness()
 
 
 class Population:
 
-    def __init__(self, chromoList: list):
+    def __init__(self, chromo_list: list):
         """Initializes with a list of chromosomes. All the generation will be of the same dimension"""
-        self.chromosomes = chromoList
+        self.chromosomes = chromo_list
 
     def sort(self):
         """Sorts the population by fitness, decreasing order"""
-        self.chromosomes= sorted(self.chromosomes, reverse=True, key=getfitness)
+        self.chromosomes = sorted(self.chromosomes, reverse=True, key=getfitness)
 
     def getbest(self):
         """Returns the best chromsome, that is the first one because the population is constantly kept sorted."""

@@ -10,7 +10,7 @@ class Chromosome:
         This is to avoid the fitness being calculated multiple times uselessly."""
         if hasattr(self, "fitness"):
             return self.fitness
-        self.fitness=self.calculatefitness()
+        self.fitness = self.calculatefitness()
         return self.fitness
 
     def calculatefitness(self):
