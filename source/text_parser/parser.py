@@ -10,7 +10,7 @@ def _robust_str_int_cast(in_str):
     :return: the int obtained by concatenated all digits in in_str,
     None if no digits are present.
     """
-    clean = re.sub('[^0-9]+', '', in_str)
+    clean = re.sub('[^0-9-]+', '', in_str)
     if clean != '':
         return int(clean)
     return None
@@ -77,6 +77,12 @@ def reduce_sum(*args):
     return s
 
 
+def alternative_mapper(token):
+    clean = re.sub("[^0-9-.]+", '', token)
+    if clean != '':
+        return float(clean)
+    return None
+
 class ATestClass:
     def __init__(self, a, b):
         self.prod = a * b
@@ -86,11 +92,18 @@ class ATestClass:
         return "I am the test class.\nproduct: "+str(self.prod)+"\nsum: "+str(self.sum)
 
 
+# Test a custom robust reducer
 print(p.read_line(reducer=reduce_sum))
+# Test the default reducer
 print(p.read_line())
+# Note: here we are testing non-robust reducers: this constructor wants exactly 2 integers.
+# Should raise an exception if more than 2 are given.
 print(p.read_line(reducer=ATestClass))
-print(p.read_line(reducer=reduce_sum))
+# Test also with a different mapper
+print(p.read_line(reducer=reduce_sum, mapper=alternative_mapper))
 print(p.read_line())
+print(p.read_line())
+# Again a test with the most elementary and non-robust reducer, only one argument.
 print(p.read_line(reducer=lambda x: x))
 print(p.read_line(reducer=reduce_sum))
 p.close()
