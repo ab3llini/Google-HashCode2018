@@ -34,23 +34,27 @@ def _map(in_lst, mapper):
     return ret
 
 
+def _space_splitter(in_str):
+    return in_str.split(' ')
+
+
 class Parser:
     def __init__(self, in_f):
         self.__in = open(in_f)
 
-    def read_line(self, reducer=lambda *x: x, separator=' ', mapper=_robust_str_int_cast):
+    def read_line(self, reducer=lambda *x: x, splitter=_space_splitter, mapper=_robust_str_int_cast):
         """
         Perform a single line map-reduce parsing:
         1) the next line is read from the file (until a \n is found. \n is INCLUDED)
-        2) the line is separated into tokens, based on the separator char.
+        2) the line is separated into tokens, based on the splitter function.
         3) the tokens are mapped according to the mapper function
         4) the list of mapped tokens is reduced through the reducer. Tokens are passed as varargs
         :param reducer: reduction applied at step 4. By default, output inputs as a tuple
-        :param separator: the character used to separate tokens in the line. Space by default
+        :param splitter: the function used to split the line into tokens. Space-split by default
         :param mapper: the function to map string tokens to useful elements. A robust cast to int by default
         :return: the result of the reduction of step 4, whatever it is.
         """
-        tokens = self.__in.readline().split(separator)
+        tokens = splitter(self.__in.readline())
         return reducer(*_map(tokens, mapper))
 
     def close(self):
@@ -83,13 +87,14 @@ def alternative_mapper(token):
         return float(clean)
     return None
 
+
 class ATestClass:
     def __init__(self, a, b):
         self.prod = a * b
         self.sum = a + b
 
     def __str__(self):
-        return "I am the test class.\nproduct: "+str(self.prod)+"\nsum: "+str(self.sum)
+        return "I am the test class.\nproduct: " + str(self.prod) + "\nsum: " + str(self.sum)
 
 
 # Test a custom robust reducer
