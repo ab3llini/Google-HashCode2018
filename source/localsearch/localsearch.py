@@ -7,4 +7,3 @@ def localsearch(neighborhood, best, solutionsequaity, startingsolution, iteratio
             return nextsolution
         iternumber += 1
         initsol = nextsolution
-        print(initsol)

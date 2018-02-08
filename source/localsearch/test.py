@@ -7,20 +7,21 @@ initsol = 0
 
 #Example with sin(x)
 def func(x):
-    return math.sin(x)
+    return math.sin(x)*math.cos(x)
 
-def best(list):
-    max = list[0]
-    for i in range(0, len(list)):
-        if(func(list[i])>func(max)):
-            max = list[i]
+
+def best(lista):
+    max = lista[0]
+    for i in range(0, len(lista)):
+        if(func(lista[i])>func(max)):
+            max = lista[i]
     return max
 
 
-def neighborhood(sol, precision=0.01, step=0.2):
-    i = -step
-    res = []
-    while i <= step:
+def neighborhood(sol, precision=0.001, window=0.2):
+    i = -window
+    res = [sol]
+    while i <= window:
         res.append(sol+i)
         i += precision
     return res
@@ -29,6 +30,5 @@ def neighborhood(sol, precision=0.01, step=0.2):
 def equal(sol1,sol2):
     return sol1 == sol2
 
-print("EXPECTED: ", math.asin(1))
 final = localsearch(neighborhood, best, equal, initsol)
 print("FOUND:    ", final, "-> VALUE: ", func(final))
