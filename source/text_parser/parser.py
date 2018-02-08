@@ -41,7 +41,27 @@ def _space_splitter(in_str):
 
 class Parser:
     def __init__(self, in_f):
-        self.__in = open(in_f)
+        self.__filein = in_f
+        self.__in = None
+
+    def __enter__(self):
+        """
+        Called when entering a with context. Opens the input file.
+        """
+        self.start()
+        return self
+
+    def __exit__(self, tp, value, traceback):
+        """
+        Called when terminating a with context. Closes the input file.
+        """
+        self.close()
+
+    def close(self):
+        self.__in.close()
+
+    def start(self):
+        self.__in = open(self.__filein)
 
     def read_line(self, reducer=lambda *x: x, splitter=_space_splitter, mapper=_robust_str_int_cast):
         """
@@ -79,12 +99,6 @@ class Parser:
             mat.append(row)
         return np.array(mat)
 
-    def close(self):
-        """
-        remember to close the file!
-        """
-        self.__in.close()
-
 
 # just test... but you will need to produce a file first!
 fin = os.path.abspath('/home/luca/Scrivania/test.txt')
@@ -93,7 +107,6 @@ with open(fin) as f:
     for line in f:
         print(line, end='')
 print("--- end of file content ---\n\n")
-p = Parser(fin)
 
 
 def reduce_sum(*args):
@@ -119,22 +132,23 @@ class ATestClass:
         return "I am the test class.\nproduct: " + str(self.prod) + "\nsum: " + str(self.sum)
 
 
-# Test basic matrix reading:
-print(p.read_matrix(rows=3, cols=3))
-# Test custom-splitter matrix reading:
-print(p.read_matrix(rows=4, cols=3, column_splitter=lambda s: list(s), mapper=lambda t: t))
-# Test a custom robust reducer
-print(p.read_line(reducer=reduce_sum))
-# Test the default reducer
-print(p.read_line())
-# Note: here we are testing non-robust reducers: this constructor wants exactly 2 integers.
-# Should raise an exception if more than 2 are given.
-print(p.read_line(reducer=ATestClass))
-# Test also with a different mapper
-print(p.read_line(reducer=reduce_sum, mapper=alternative_mapper))
-print(p.read_line())
-print(p.read_line())
-# Again a test with the most elementary and non-robust reducer, only one argument.
-print(p.read_line(reducer=lambda x: x))
-print(p.read_line(reducer=reduce_sum))
-p.close()
+with Parser(fin) as p:
+    # Test basic matrix reading:
+    print(p.read_matrix(rows=3, cols=3))
+    # Test custom-splitter matrix reading:
+    print(p.read_matrix(rows=4, cols=3, column_splitter=lambda s: list(s), mapper=lambda t: t))
+    # Test a custom robust reducer
+    print(p.read_line(reducer=reduce_sum))
+    # Test the default reducer
+    print(p.read_line())
+    # Note: here we are testing non-robust reducers: this constructor wants exactly 2 integers.
+    # Should raise an exception if more than 2 are given.
+    print(p.read_line(reducer=ATestClass))
+    # Test also with a different mapper
+    print(p.read_line(reducer=reduce_sum, mapper=alternative_mapper))
+    print(p.read_line())
+    print(p.read_line())
+    # Again a test with the most elementary and non-robust reducer, only one argument.
+    print(p.read_line(reducer=lambda x: x))
+    print(p.read_line(reducer=reduce_sum))
+
