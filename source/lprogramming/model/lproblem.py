@@ -106,7 +106,7 @@ class LPProblem:
     def __str__(self):
         x = "%s {" % self.obj.value
         for i, e in enumerate((self.c.asarray() if type(self.c) is not np.ndarray else self.c)[0]):
-            x += " %s%.2f * %s%d" % (
+            x += " %s%.2f * %s_%d" % (
                 ("+ " if e >= 0 and i != 0 else ""),
                 e,
                 self.var_names, i + 1
@@ -115,7 +115,7 @@ class LPProblem:
 
         for i, row in enumerate(self.a.asarray() if type(self.a) is not np.ndarray else self.a):
             for j, col_e in enumerate(row):
-                x += "%s%.2f * %s%d " % (
+                x += "%s%.2f * %s_%d " % (
                     ("+ " if col_e >= 0 and j != 0 else ""),
                     col_e,
                     self.var_names,
@@ -127,7 +127,7 @@ class LPProblem:
             )
 
         for i, sign in enumerate(self.var_signs):
-            x += "%s%d %s%s" % (
+            x += "%s_%d %s%s" % (
                 self.var_names,
                 i + 1,
                 "free" if sign == LPSign.FREE else ("%s 0" % sign.value),

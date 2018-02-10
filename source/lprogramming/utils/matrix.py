@@ -3,7 +3,10 @@ import numpy as np
 
 
 def __apply_method(obj, m):
-    return np.array(obj) if m is None else m(np.array(obj))
+    if type(obj) is not np.ndarray:
+        return np.array(obj) if m is None else m(np.array(obj))
+    else:
+        return obj if m is None else m(obj)
 
 
 # Try not to abuse this method. Could be very slow due to transfers between CPU ad GPU
@@ -12,10 +15,11 @@ def to_array(obj):
 
 
 def build(method=None, **elements):
-    o = {}
-    for key, value in elements.items():
-        if type(value) is not np.ndarray:
+    if len(elements.keys()) == 1:
+        k, v = elements.popitem()
+        return __apply_method(v, method)
+    else:
+        o = {}
+        for key, value in elements.items():
             o[key] = __apply_method(value, method)
-        else:
-            o[key] = value
-    return o
+        return o

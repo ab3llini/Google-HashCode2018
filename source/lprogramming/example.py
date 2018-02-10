@@ -1,5 +1,5 @@
 import numpy as np
-# import cudamat as cm
+import cudamat as cm
 import lprogramming.model.lproblem as lp
 import lprogramming.utils.matrix as mx_util
 import lprogramming.solver.simplex as simplex
@@ -29,7 +29,7 @@ start = [
 # multidimensional arrays or cudamat one's. IMPORTANT: Keep in mind that, when building the input, YOU specify the
 # key for the output dictionary! Thus if you pass something like xxx=rawConstraintMatrix, the output dictionary will
 # map the build matrix to key xxx
-lp_input = mx_util.build(a=a, b=b, c=c, start=start)
+lp_input = mx_util.build(a=a, b=b, c=c, start=start, method=cm.CUDAMatrix)
 
 # Set signs, in this case all constraints have the same sign.
 # Note: You could set signs manually if you want, just provide a consistent array of LPSigns
@@ -54,6 +54,6 @@ print(p)
 print(d)
 
 # simplex.solve(p, None, engine=cm)
-solver = simplex.Solver()
+solver = simplex.Solver(engine=cm)
 
 solver.solve(p, lp_input["start"])
