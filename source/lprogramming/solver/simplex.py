@@ -1,58 +1,37 @@
 import numpy as np
 import lprogramming.model.lproblem as lp
+import lprogramming.utils.matrix as mx_util
 
 class Solver:
 
     def __init__(self, engine=np):
         print("Solver instance successfully created with %s engine" % ("CPU" if engine is np else "GPU"))
         self.engine = engine
+        self.build_method = self.engine.CUDAMatrix() if self.engine is not np else None
 
-
-
-    # Try not to abuse this method. Could be very slow
-    def __to_array(self, obj):
-        return obj.asarray() if type(obj) is not np.ndarray else obj
-
-    # Wrapper to have a generic dot operation for cpu or gpu.
-    # In either case returns a np array, thus gpu impl will be slow.
-    # It will make sense to use gpu only if the matrix are very huge
-    def dot(self, a, b):
-
-        # Fist, check which engine we are using
-        if self.engine != np:
-            # If we are un GPU we need to transfer the data from Host to Device
-            # Don't worry about warnings: we will never call CUDAMatrix on np causing exceptions.
-            if type(a) is np.ndarray:
-                a = self.engine.CUDAMatrix(a)
-            if type(b) is np.ndarray:
-                b = self.engine.CUDAMatrix(b)
-
-        # noinspection PyTypeChecker
-        res = self.engine.dot(a, b)
-
-        return self.__to_array(res)
-
-    def __compute_active_constraints(self, A, x, b):
+    def __compute_active_constraints(self, a, x, b):
 
         print("Computing active constraints..")
 
-        I = []
+        active_set = []
+
         # Compute A * x and then check which line is equal to b
-        res = self.dot(A, x)
+        # Lot of CPU <--> GPU Transfers if on GPU
+        result_components = mx_util.to_array(self.engine.dot(a, x))
+        a_components = mx_util.to_array(a)
+        b_components = mx_util.to_array(b)
 
-        a_components = self.__to_array(A)
-
-        for i, const in enumerate(self.__to_array(b)):
-            if const == res[i]:
-                print("%d constraint is active" % (i+1))
-                active = self.__to_array(a_components[i])
-                I.append(active)
+        for component, b_element in enumerate(b_components):
+            if b_element == result_components[component]:
+                print("%d constraint is active" % (component+1))
+                active = a_components[component]
+                active_set.append(active)
             else:
-                print("%d constraint is NOT active" % (i + 1))
+                print("%d constraint is NOT active" % (component + 1))
 
-        return np.array(I)
+        return mx_util.build(method=self.build_method, a=active_set)
 
-    def solve(self, problem, start):
+    def solve(self, problem, start=None):
 
         optimal = False
         unlimited = False
@@ -62,23 +41,29 @@ class Solver:
 
         expected_shape = problem.c.transpose().shape
 
+        # Check that the given starting point has a correct shape
         if expected_shape != start.shape:
             raise Exception("Bad start point: vector size does not match."
                             "Expected => %ds, Got => %ds" % (expected_shape, start.shape))
 
+        # Check consistency between matrix types and selected engine
         if (
-                type(problem.A) is not np.ndarray or
+                type(problem.a) is not np.ndarray or
                 type(problem.b) is not np.ndarray or
                 type(problem.c) is not np.ndarray or
-                type(start) is not np.ndarray
+                    (start is not None and type(start) is not np.ndarray)
         ) and self.engine is np:
             raise Exception("Warning: Solver was initialized with a CUDA dataset but is not using cudamat")
+
+        # TODO: If a starting point was not given, compute one
+        # TODO: Check that the constraints used to compute the starting point are not parallel
 
         print("Building restricted primal..")
 
         # Get active constraints
+        active = self.__compute_active_constraints(problem.a, start, problem.b)
+        print(active)
 
-        # Todo...
-        print(self.__compute_active_constraints(problem.A, start, problem.b))
+        # Build restricted primal
 
-        # TODO....
+

@@ -6,7 +6,7 @@ import numpy as np
 kRowComponent = 0
 kColComponent = 1
 kCostRef = "c"
-kConstraintsRef = "A"
+kConstraintsRef = "a"
 kConstantRef = "b"
 kStartRef = "start"
 
@@ -32,46 +32,46 @@ class LPSign(Enum):
 class LPProblem:
 
     """Input needs to be a tuple (literally) of elements of type: c, b, A"""
-    def __init__(self, objective, input_v, constraints_signs, var_signs=None, var_names="x"):
+    def __init__(self, objective, c, a, b, a_signs, v_signs=None, v_name="x"):
 
         self.obj = objective
-        self.c = input_v["c"]
-        self.A = input_v["A"]
-        self.b = input_v["b"]
+        self.c = c
+        self.a = a
+        self.b = b
 
-        if var_signs is None:
-            var_signs = [LPSign.FREE] * self.A.shape[kColComponent]
+        if v_signs is None:
+            v_signs = [LPSign.FREE] * self.a.shape[kColComponent]
 
         if self.c.shape[kRowComponent] > 1:
             raise Exception("Incompatible cost vector: cost vector has %s rows instead of 1" % (self.c.shape[kRowComponent]))
 
-        if self.c.shape[kColComponent] != self.A.shape[kColComponent]:
+        if self.c.shape[kColComponent] != self.a.shape[kColComponent]:
             raise Exception("Incompatible constraint matrix: the cost vector has %s cols while the constraint matrix "
-                            "has %s cols" % (self.c.shape[kColComponent], self.A.shape[kColComponent]))
+                            "has %s cols" % (self.c.shape[kColComponent], self.a.shape[kColComponent]))
 
-        if self.A.shape[kRowComponent] != self.b.shape[kRowComponent] or self.b.shape[kColComponent] > 1:
+        if self.a.shape[kRowComponent] != self.b.shape[kRowComponent] or self.b.shape[kColComponent] > 1:
             raise Exception("Incompatible constant vector: the constant vector has %s rows while the constraint matrix "
-                            "has %s rows" % (self.b.shape[kRowComponent], self.A.shape[kRowComponent]))
+                            "has %s rows" % (self.b.shape[kRowComponent], self.a.shape[kRowComponent]))
 
-        if len(constraints_signs) != self.A.shape[kRowComponent]:
+        if len(a_signs) != self.a.shape[kRowComponent]:
             raise Exception("Wrong sign number for constraints:"
-                            "have %s, expected %s" % (len(constraints_signs), self.A.shape[kRowComponent]))
+                            "have %s, expected %s" % (len(a_signs), self.a.shape[kRowComponent]))
 
-        if len(var_signs) != self.A.shape[kColComponent]:
+        if len(v_signs) != self.a.shape[kColComponent]:
             raise Exception("Wrong sign number for variables:"
-                            "have %s, expected %s" % (len(constraints_signs), self.A.shape[kColComponent]))
+                            "have %s, expected %s" % (len(a_signs), self.a.shape[kColComponent]))
 
-        for sign in constraints_signs:
+        for sign in a_signs:
             if sign == LPSign.FREE:
                 raise Exception("A constraint sign cannot be free")
 
-        for sign in var_signs:
+        for sign in v_signs:
             if sign == LPSign.EQ:
                 raise Exception("A variable sign cannot be equal")
 
-        self.A_sign = constraints_signs
-        self.var_signs = var_signs
-        self.var_names = var_names
+        self.A_sign = a_signs
+        self.var_signs = v_signs
+        self.var_names = v_name
 
 
     def get_dual(self, var_name="y"):
@@ -80,14 +80,12 @@ class LPProblem:
 
         return LPProblem(
             LPObjective.MINIMIZE if self.obj == LPObjective.MAXIMIZE else LPObjective.MAXIMIZE,
-            {
-                kCostRef: self.b.transpose(),
-                kConstraintsRef: self.A.transpose(),
-                kConstantRef: self.c.transpose()
-            },
-            dual_signs["A"],
-            dual_signs["VAR"],
-            var_name
+            c=self.b.transpose(),
+            a=self.a.transpose(),
+            b=self.c.transpose(),
+            a_signs=dual_signs["a"],
+            v_signs=dual_signs["v"],
+            v_name=var_name
         )
 
     def get_dual_signs(self):
@@ -103,7 +101,7 @@ class LPProblem:
                 dual_a_signs.append(LPSign.GE if sign == LPSign.LE else LPSign.LE if sign == LPSign.GE else LPSign.EQ)
             for sign in self.A_sign:
                 dual_var_signs.append(sign if sign != LPSign.EQ else LPSign.FREE)
-        return {"A" : dual_a_signs, "VAR" : dual_var_signs}
+        return {"a": dual_a_signs, "v": dual_var_signs}
 
     def __str__(self):
         x = "%s {" % self.obj.value
@@ -115,7 +113,7 @@ class LPProblem:
             )
         x += " }\n"
 
-        for i, row in enumerate(self.A.asarray() if type(self.A) is not np.ndarray else self.A):
+        for i, row in enumerate(self.a.asarray() if type(self.a) is not np.ndarray else self.a):
             for j, col_e in enumerate(row):
                 x += "%s%.2f * %s%d " % (
                     ("+ " if col_e >= 0 and j != 0 else ""),
