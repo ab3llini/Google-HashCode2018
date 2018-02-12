@@ -1,5 +1,4 @@
-import numpy as np
-#import cudamat as cm
+import cudamat as cm
 import lprogramming.model.lproblem as lp
 import lprogramming.solver.simplex as simplex
 
@@ -21,7 +20,7 @@ b = [
 
 start = [
     [2],
-    [6]
+    [2]
 ]
 
 # Set signs, in this case all constraints have the same sign.
@@ -30,6 +29,7 @@ a_signs = lp.init_constraints_signs_to(lp.LPSign.LE, a)
 
 # Set the 2 variable signs to less then or equal to 0
 v_signs = [lp.LPSign.GE] * 2
+
 
 # If you do not provide the signs for the variables, they are all set to FREE
 # Create a new instance of a problem. See the class definition for the full list of parameters
@@ -48,8 +48,5 @@ print(d)
 
 # simplex.solve(p, None, engine=cm)
 solver = simplex.Solver()
-
-
-print(p.is_feasible(start))
 
 solver.solve(p, start)

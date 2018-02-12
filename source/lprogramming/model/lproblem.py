@@ -2,7 +2,6 @@ from enum import Enum
 import numpy as np
 import lprogramming.utils.matrix as mx_util
 
-
 # Global constant definitions
 kRowComponent = 0
 kColComponent = 1
@@ -24,15 +23,26 @@ class LPObjective(Enum):
 
 
 class LPSign(Enum):
-    GE = ">="
-    LE = "<="
-    EQ = "="
-    FREE = "<>"
+    GE = lambda left, right: (left >= right)
+    LE = lambda left, right: (left <= right)
+    EQ = lambda left, right: (left == right)
+    FREE = lambda left, right: True
+
+    @staticmethod
+    def stringify_sign(sign):
+        if sign is LPSign.GE:
+            return ">="
+        elif sign is LPSign.LE:
+            return "<="
+        elif sign is LPSign.EQ:
+            return "=="
+        elif sign is LPSign.FREE:
+            return "free"
 
 
 class LPProblem:
-
     """Input needs to be a tuple (literally) of elements of type: c, b, A"""
+
     def __init__(self, objective, c, a, b, a_signs, v_signs=None, v_name="x", engine=np):
 
         self.build_method = engine.CUDAMatrix if engine is not np else None
@@ -47,12 +57,12 @@ class LPProblem:
         self.a = lp_input["a"]
         self.b = lp_input["b"]
 
-
         if v_signs is None:
             v_signs = [LPSign.FREE] * self.a.shape[kColComponent]
 
         if self.c.shape[kRowComponent] > 1:
-            raise Exception("Incompatible cost vector: cost vector has %s rows instead of 1" % (self.c.shape[kRowComponent]))
+            raise Exception(
+                "Incompatible cost vector: cost vector has %s rows instead of 1" % (self.c.shape[kRowComponent]))
 
         if self.c.shape[kColComponent] != self.a.shape[kColComponent]:
             raise Exception("Incompatible constraint matrix: the cost vector has %s cols while the constraint matrix "
@@ -82,20 +92,8 @@ class LPProblem:
         self.var_signs = v_signs
         self.var_names = v_name
 
-    def respects_sign(self, a, sign, b):
-        if sign == LPSign.LE:
-            return a <= b
-        elif sign == LPSign.EQ:
-            return a == b
-        elif sign == LPSign.GE:
-            return a >= b
-        else:
-            raise Exception("Found unexpected sign")
-
-
+    # Calling this method with an un built point will cause a crash.
     def is_feasible(self, point):
-
-        point = mx_util.build(method=self.build_method, object=point)
 
         if point.shape[kRowComponent] != self.a.shape[kColComponent]:
             raise Exception("Invalid point shape")
@@ -104,19 +102,19 @@ class LPProblem:
             b_components = mx_util.to_array(self.b)
             try:
                 for component, const in enumerate(b_components):
-                    if not self.respects_sign(a=result_components[component], sign=self.a_signs[component], b=const):
+                    if not self.a_signs[component](result_components[component], const):
                         raise Exception("Constraint not respected")
 
-                for component, element in enumerate(result_components):
-                    if not self.respects_sign(a=element, sign=self.var_signs[component], b=0):
+                point = mx_util.to_array(point)
+
+                for i, var in enumerate(self.var_signs):
+                    if not self.var_signs[i](point[i][0], 0):
                         raise Exception("Var sign not respected")
 
                 return True
             except Exception as e:
-                print(e)
+                print("Feasibility check: %s for \n%s" % (e, point))
                 return False
-
-
 
     def get_dual(self, var_name="y"):
 
@@ -137,7 +135,8 @@ class LPProblem:
         dual_var_signs = []
         if self.obj == LPObjective.MAXIMIZE:
             for sign in self.a_signs:
-                dual_var_signs.append(LPSign.GE if sign == LPSign.LE else LPSign.LE if sign == LPSign.GE else LPSign.FREE)
+                dual_var_signs.append(
+                    LPSign.GE if sign == LPSign.LE else LPSign.LE if sign == LPSign.GE else LPSign.FREE)
             for sign in self.var_signs:
                 dual_a_signs.append(sign if sign != LPSign.FREE else LPSign.EQ)
         else:
@@ -166,7 +165,7 @@ class LPProblem:
                     j + 1
                 )
             x += "%s %d\n" % (
-                self.a_signs[i].value,
+                LPSign.stringify_sign(self.a_signs[i]),
                 (self.b.asarray() if type(self.b) is not np.ndarray else self.b)[i]
             )
 
@@ -174,9 +173,7 @@ class LPProblem:
             x += "%s_%d %s%s" % (
                 self.var_names,
                 i + 1,
-                "free" if sign == LPSign.FREE else ("%s 0" % sign.value),
+                "free" if sign == LPSign.FREE else ("%s 0" % LPSign.stringify_sign(sign)),
                 ", " if (len(self.var_signs) - 1) != i else "\n"
             )
         return x
-
-

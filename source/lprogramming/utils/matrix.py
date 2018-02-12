@@ -1,11 +1,15 @@
 import numpy as np
 
-
+# Could arrive a CUDAMAtrix, a nparray or a list
 def __apply_method(obj, m):
-    if type(obj) is not np.ndarray:
-        return np.array(obj) if m is None else m(np.array(obj))
+    # If already built as CUDAMatrix, pass through
+    if not isinstance(obj, (list)) and type(obj) is not np.ndarray:
+        return obj
     else:
-        return obj if m is None else m(obj)
+        if type(obj) is not np.ndarray:
+            return np.array(obj) if m is None else m(np.array(obj))
+        else:
+            return obj if m is None else m(obj)
 
 
 # Try not to abuse this method. Could be very slow due to transfers between CPU ad GPU
