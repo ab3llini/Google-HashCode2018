@@ -4,10 +4,10 @@ import lprogramming.utils.matrix as mx_util
 
 class Solver:
 
-    def __init__(self, engine=np):
-        print("Solver instance successfully created with %s engine" % ("CPU" if engine is np else "GPU"))
-        self.engine = engine
-        self.build_method = self.engine.CUDAMatrix if self.engine is not np else None
+    def __init__(self):
+        self.engine = None
+        self.build_method = None
+        print("Solver instance successfully created")
 
     def __compute_active_constraints(self, a, x, b):
 
@@ -36,33 +36,36 @@ class Solver:
         optimal = False
         unlimited = False
 
-        print("Solving problem:")
+        print("Matrix handling will be performed by: %s" % ("numpy" if problem.engine is np else "cudamat"))
+
+        self.engine = problem.engine
+        self.build_method = problem.build_method
+
+        print("Solving problem:\n")
         print(problem)
 
-        expected_shape = problem.c.transpose().shape
+        # Prepare the starting point, if exists
+        if start is not None:
 
-        # Check that the given starting point has a correct shape
-        if expected_shape != start.shape:
-            raise Exception("Bad start point: vector size does not match."
-                            "Expected => %ds, Got => %ds" % (expected_shape, start.shape))
+            # Build start point
+            start = mx_util.build(self.build_method, object=start)
 
-        # Check consistency between matrix types and selected engine
-        if (
-                type(problem.a) is not np.ndarray or
-                type(problem.b) is not np.ndarray or
-                type(problem.c) is not np.ndarray or
-                    (start is not None and type(start) is not np.ndarray)
-        ) and self.engine is np:
-            raise Exception("Warning: Solver was initialized with a CUDA dataset but is not using cudamat")
+            # Get expected start shape
+            expected_shape = problem.c.transpose().shape
+
+            # Check that the given starting point has a correct shape
+            if expected_shape != start.shape:
+                raise Exception("Bad start point: vector size does not match."
+                                "Expected => %ds, Got => %ds" % (expected_shape, start.shape))
 
         # TODO: If a starting point was not given, compute one
         # TODO: Check that the constraints used to compute the starting point are not parallel
 
-        print("Computing active constraints..")
+        print("Computing active constraints..\n")
         # Get active constraints
         active_constraints = self.__compute_active_constraints(problem.a, start, problem.b)
 
-        print("Building restricted primal..")
+        print("Building restricted primal..\n")
 
         # Build the const matrix as a column vector of zeroes
         constants = mx_util.build(method=self.build_method, b=np.zeros(shape=(active_constraints.shape[lp.kRowComponent], 1)))
@@ -78,7 +81,7 @@ class Solver:
 
         print(pr)
 
-        print("Building restricted dual..")
+        print("Building restricted dual..\n")
 
         print(pr.get_dual(var_name="eta"))
 

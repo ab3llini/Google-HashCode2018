@@ -1,4 +1,3 @@
-import lprogramming.model.lproblem as lp
 import numpy as np
 
 

@@ -1,7 +1,6 @@
 import numpy as np
-import cudamat as cm
+#import cudamat as cm
 import lprogramming.model.lproblem as lp
-import lprogramming.utils.matrix as mx_util
 import lprogramming.solver.simplex as simplex
 
 # First things first: provide a consistent representation of the input
@@ -25,15 +24,9 @@ start = [
     [6]
 ]
 
-# In order for our model to work, we need another representation of our input matrices Valid formats are numpy's
-# multidimensional arrays or cudamat one's. IMPORTANT: Keep in mind that, when building the input, YOU specify the
-# key for the output dictionary! Thus if you pass something like xxx=rawConstraintMatrix, the output dictionary will
-# map the build matrix to key xxx
-lp_input = mx_util.build(a=a, b=b, c=c, start=start, method=cm.CUDAMatrix)
-
 # Set signs, in this case all constraints have the same sign.
 # Note: You could set signs manually if you want, just provide a consistent array of LPSigns
-a_signs = lp.init_constraints_signs_to(lp.LPSign.LE, lp_input["a"])
+a_signs = lp.init_constraints_signs_to(lp.LPSign.LE, a)
 
 # Set the 2 variable signs to less then or equal to 0
 v_signs = [lp.LPSign.GE] * 2
@@ -42,10 +35,10 @@ v_signs = [lp.LPSign.GE] * 2
 # Create a new instance of a problem. See the class definition for the full list of parameters
 # Shortly, we need the objective, the built input data, the A matrix signs,
 # var signs (default to FREE) and var names (Default to x)
-p = lp.LPProblem(lp.LPObjective.MAXIMIZE, c=lp_input["c"], a=lp_input["a"], b=lp_input["b"], a_signs=a_signs, v_signs=v_signs)
+p = lp.LPProblem(lp.LPObjective.MAXIMIZE, c=c, a=a, b=b, a_signs=a_signs, v_signs=v_signs)
 
 # We can build the dual representation like this
-# Note that if the data set was build with cudamat the transpose op. will be performed on GPU
+# Note that if the engine is cudamat the transpose op. will be performed on GPU
 # An optional parameter can be specified and refers to the var names (default to y)
 d = p.get_dual()
 
@@ -54,6 +47,9 @@ print(p)
 print(d)
 
 # simplex.solve(p, None, engine=cm)
-solver = simplex.Solver(engine=cm)
+solver = simplex.Solver()
 
-solver.solve(p, lp_input["start"])
+
+print(p.is_feasible(start))
+
+solver.solve(p, start)

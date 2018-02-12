@@ -1,5 +1,6 @@
 from enum import Enum
 import numpy as np
+import lprogramming.utils.matrix as mx_util
 
 
 # Global constant definitions
@@ -13,7 +14,7 @@ kStartRef = "start"
 
 # Auxiliary functions
 def init_constraints_signs_to(sign, matrix):
-    return [sign] * matrix.shape[kRowComponent]
+    return [sign] * len(matrix)
 
 
 # Objects declaration
@@ -32,12 +33,20 @@ class LPSign(Enum):
 class LPProblem:
 
     """Input needs to be a tuple (literally) of elements of type: c, b, A"""
-    def __init__(self, objective, c, a, b, a_signs, v_signs=None, v_name="x"):
+    def __init__(self, objective, c, a, b, a_signs, v_signs=None, v_name="x", engine=np):
 
+        self.build_method = engine.CUDAMatrix if engine is not np else None
+
+        # In order for our model to work, we need another representation of our input matrices Valid formats are numpy's
+        # multidimensional arrays or cudamat one's.
+        lp_input = mx_util.build(a=a, b=b, c=c, method=self.build_method)
+
+        self.engine = engine
         self.obj = objective
-        self.c = c
-        self.a = a
-        self.b = b
+        self.c = lp_input["c"]
+        self.a = lp_input["a"]
+        self.b = lp_input["b"]
+
 
         if v_signs is None:
             v_signs = [LPSign.FREE] * self.a.shape[kColComponent]
@@ -69,9 +78,44 @@ class LPProblem:
             if sign == LPSign.EQ:
                 raise Exception("A variable sign cannot be equal")
 
-        self.A_sign = a_signs
+        self.a_signs = a_signs
         self.var_signs = v_signs
         self.var_names = v_name
+
+    def respects_sign(self, a, sign, b):
+        if sign == LPSign.LE:
+            return a <= b
+        elif sign == LPSign.EQ:
+            return a == b
+        elif sign == LPSign.GE:
+            return a >= b
+        else:
+            raise Exception("Found unexpected sign")
+
+
+    def is_feasible(self, point):
+
+        point = mx_util.build(method=self.build_method, object=point)
+
+        if point.shape[kRowComponent] != self.a.shape[kColComponent]:
+            raise Exception("Invalid point shape")
+        else:
+            result_components = mx_util.to_array(self.engine.dot(self.a, point))
+            b_components = mx_util.to_array(self.b)
+            try:
+                for component, const in enumerate(b_components):
+                    if not self.respects_sign(a=result_components[component], sign=self.a_signs[component], b=const):
+                        raise Exception("Constraint not respected")
+
+                for component, element in enumerate(result_components):
+                    if not self.respects_sign(a=element, sign=self.var_signs[component], b=0):
+                        raise Exception("Var sign not respected")
+
+                return True
+            except Exception as e:
+                print(e)
+                return False
+
 
 
     def get_dual(self, var_name="y"):
@@ -92,14 +136,14 @@ class LPProblem:
         dual_a_signs = []
         dual_var_signs = []
         if self.obj == LPObjective.MAXIMIZE:
-            for sign in self.A_sign:
+            for sign in self.a_signs:
                 dual_var_signs.append(LPSign.GE if sign == LPSign.LE else LPSign.LE if sign == LPSign.GE else LPSign.FREE)
             for sign in self.var_signs:
                 dual_a_signs.append(sign if sign != LPSign.FREE else LPSign.EQ)
         else:
             for sign in self.var_signs:
                 dual_a_signs.append(LPSign.GE if sign == LPSign.LE else LPSign.LE if sign == LPSign.GE else LPSign.EQ)
-            for sign in self.A_sign:
+            for sign in self.a_signs:
                 dual_var_signs.append(sign if sign != LPSign.EQ else LPSign.FREE)
         return {"a": dual_a_signs, "v": dual_var_signs}
 
@@ -122,7 +166,7 @@ class LPProblem:
                     j + 1
                 )
             x += "%s %d\n" % (
-                self.A_sign[i].value,
+                self.a_signs[i].value,
                 (self.b.asarray() if type(self.b) is not np.ndarray else self.b)[i]
             )
 
