@@ -43,15 +43,12 @@ class LPSign(Enum):
 class LPProblem:
     """Input needs to be a tuple (literally) of elements of type: c, b, A"""
 
-    def __init__(self, objective, c, a, b, a_signs, v_signs=None, v_name="x", engine=np):
-
-        self.build_method = engine.CUDAMatrix if engine is not np else None
+    def __init__(self, objective, c, a, b, a_signs, v_signs=None, v_name="x"):
 
         # In order for our model to work, we need another representation of our input matrices Valid formats are numpy's
-        # multidimensional arrays or cudamat one's.
-        lp_input = mx_util.build(a=a, b=b, c=c, method=self.build_method)
+        # multidimensional arrays
+        lp_input = mx_util.build(a=a, b=b, c=c)
 
-        self.engine = engine
         self.obj = objective
         self.c = lp_input["c"]
         self.a = lp_input["a"]
@@ -98,14 +95,14 @@ class LPProblem:
         if point.shape[kRowComponent] != self.a.shape[kColComponent]:
             raise Exception("Invalid point shape")
         else:
-            result_components = mx_util.to_array(self.engine.dot(self.a, point))
-            b_components = mx_util.to_array(self.b)
+            result_components = np.dot(self.a, point)
+            b_components = self.b
             try:
                 for component, const in enumerate(b_components):
                     if not self.a_signs[component](result_components[component], const):
                         raise Exception("Constraint not respected")
 
-                point = mx_util.to_array(point)
+                point = point
 
                 for i, var in enumerate(self.var_signs):
                     if not self.var_signs[i](point[i][0], 0):
@@ -148,7 +145,7 @@ class LPProblem:
 
     def __str__(self):
         x = "%s {" % self.obj.value
-        for i, e in enumerate((self.c.asarray() if type(self.c) is not np.ndarray else self.c)[0]):
+        for i, e in enumerate(self.c[0]):
             x += " %s%.2f * %s_%d" % (
                 ("+ " if e >= 0 and i != 0 else ""),
                 e,
@@ -156,7 +153,7 @@ class LPProblem:
             )
         x += " }\n"
 
-        for i, row in enumerate(self.a.asarray() if type(self.a) is not np.ndarray else self.a):
+        for i, row in enumerate(self.a):
             for j, col_e in enumerate(row):
                 x += "%s%.2f * %s_%d " % (
                     ("+ " if col_e >= 0 and j != 0 else ""),
@@ -165,8 +162,7 @@ class LPProblem:
                     j + 1
                 )
             x += "%s %d\n" % (
-                LPSign.stringify_sign(self.a_signs[i]),
-                (self.b.asarray() if type(self.b) is not np.ndarray else self.b)[i]
+                LPSign.stringify_sign(self.a_signs[i]),self.b[i]
             )
 
         for i, sign in enumerate(self.var_signs):

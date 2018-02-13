@@ -1,4 +1,3 @@
-import cudamat as cm
 import lprogramming.model.lproblem as lp
 import lprogramming.solver.simplex as simplex
 
@@ -19,8 +18,8 @@ b = [
 ]
 
 start = [
-    [2],
-    [2]
+    [0],
+    [0]
 ]
 
 # Set signs, in this case all constraints have the same sign.
@@ -38,7 +37,6 @@ v_signs = [lp.LPSign.GE] * 2
 p = lp.LPProblem(lp.LPObjective.MAXIMIZE, c=c, a=a, b=b, a_signs=a_signs, v_signs=v_signs)
 
 # We can build the dual representation like this
-# Note that if the engine is cudamat the transpose op. will be performed on GPU
 # An optional parameter can be specified and refers to the var names (default to y)
 d = p.get_dual()
 
@@ -46,7 +44,7 @@ d = p.get_dual()
 print(p)
 print(d)
 
-# simplex.solve(p, None, engine=cm)
+# simplex.solve(p, None)
 solver = simplex.Solver()
 
 solver.solve(p, start)

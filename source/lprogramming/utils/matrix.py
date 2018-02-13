@@ -1,28 +1,12 @@
 import numpy as np
 
-# Could arrive a CUDAMAtrix, a nparray or a list
-def __apply_method(obj, m):
-    # If already built as CUDAMatrix, pass through
-    if not isinstance(obj, (list)) and type(obj) is not np.ndarray:
-        return obj
-    else:
-        if type(obj) is not np.ndarray:
-            return np.array(obj) if m is None else m(np.array(obj))
-        else:
-            return obj if m is None else m(obj)
 
-
-# Try not to abuse this method. Could be very slow due to transfers between CPU ad GPU
-def to_array(obj):
-    return obj.asarray() if type(obj) is not np.ndarray else obj
-
-
-def build(method=None, **elements):
+def build(**elements):
     if len(elements.keys()) == 1:
         k, v = elements.popitem()
-        return __apply_method(v, method)
+        return np.array(v)
     else:
         o = {}
         for key, value in elements.items():
-            o[key] = __apply_method(value, method)
+            o[key] = np.array(value)
         return o

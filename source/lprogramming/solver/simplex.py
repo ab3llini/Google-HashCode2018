@@ -11,23 +11,20 @@ class UnlimitedSolutionException(Exception):
 class Solver:
 
     def __init__(self):
-        self.engine = None
-        self.build_method = None
         print("Solver instance successfully created")
 
     def compute_constraints(self, a, x, b):
 
+        print("Computing active constraints..\n")
+
         # Compute A * x and then check which line is equal to b
-        # Lot of CPU <--> GPU Transfers if on GPU
-        result_components = mx_util.to_array(self.engine.dot(a, x))
-        a_components = mx_util.to_array(a)
-        b_components = mx_util.to_array(b)
+        result_components = np.dot(a, x)
 
         active_idx = []
         inactive_idx = []
         out = {}
 
-        for component, b_element in enumerate(b_components):
+        for component, b_element in enumerate(b):
             if b_element == result_components[component]:
                 print("%d constraint is active" % (component+1))
                 active_idx.append(component)
@@ -35,34 +32,30 @@ class Solver:
                 print("%d constraint is NOT active" % (component + 1))
                 inactive_idx.append(component)
 
-        # Please note that if we apply the build method to a matrix already built nothing will happen
-        # It is just handy to do it anyway in order to get a dictionary containing all elements with 1 instruction
-        # In this case if we are working with GPU we need to rebuild the ndarrays
         if len(active_idx) > 0:
-            out["active"] = mx_util.build(
-                method=self.build_method,
-                a=a_components[active_idx, :],
-                b=b_components[active_idx, :]
-            )
+            out["active"] = {
+                "a": a[active_idx, :],
+                "b": b[active_idx, :]
+            }
         else:
             out["active"] = None
 
         if len(inactive_idx) > 0:
-            out["inactive"] = mx_util.build(
-                method=self.build_method,
-                a=a_components[inactive_idx, :],
-                b=b_components[inactive_idx, :]
-            )
+            out["inactive"] = {
+                "a": a[inactive_idx, :],
+                "b": b[inactive_idx, :]
+            }
         else:
             out["inactive"] = None
+
+        print("")
 
         return out
 
     def grow_onto(self, start, direction, inactive_a, inactive_b):
 
-        a_x = mx_util.to_array(self.engine.dot(inactive_a, start))
-        a_csi = mx_util.to_array(self.engine.dot(inactive_a, direction))
-        inactive_b = mx_util.to_array(inactive_b)
+        a_x = np.dot(inactive_a, start)
+        a_csi = np.dot(inactive_a, direction)
 
         growth = -1
 
@@ -78,21 +71,15 @@ class Solver:
         if math.isinf(growth):
             raise UnlimitedSolutionException("Unlimited growth direction")
 
-        else:
-            if self.engine is np:
-                return (direction * growth) + start
-            else:
-                return direction.mult(growth).add(start)
+        new = (direction * growth) + start
+
+        print("Start : %s\nDirection : \n%s\nStep: %s\nDestination : \n%s\n" % (start, direction, growth, new))
+
+        return new
 
     def solve(self, problem, start=None):
 
         optimal = False
-        current = None
-
-        print("Matrix handling will be performed by: %s" % ("numpy" if problem.engine is np else "cudamat"))
-
-        self.engine = problem.engine
-        self.build_method = problem.build_method
 
         print("Solving problem:\n")
         print(problem)
@@ -101,7 +88,7 @@ class Solver:
         if start is not None:
 
             # Build start point matrix
-            start = mx_util.build(self.build_method, object=start)
+            start = mx_util.build(object=start)
 
             # Get expected start shape
             expected_shape = problem.c.transpose().shape
@@ -118,7 +105,6 @@ class Solver:
         # TODO: If a starting point was not given, compute one
         # TODO: Check that the constraints used to compute the starting point are not parallel
 
-        print("Computing active constraints..\n")
         # Get active constraints
         result = self.compute_constraints(problem.a, start, problem.b)
 
@@ -130,30 +116,111 @@ class Solver:
                 inactive_a=result["inactive"]["a"],
                 inactive_b=result["inactive"]["b"]
             )
-            print(current)
 
-        # Else compute next point
+            # Recompute active constraints
+            result = self.compute_constraints(problem.a, current, problem.b)
+
+
         else:
+            current = start
+
+        # Find the optimal solution, if exists
+        while not optimal:
+
             print("Building restricted primal..\n")
 
             # Build the const matrix as a column vector of zeroes
-            constants = mx_util.build(method=self.build_method, b=np.zeros(shape=(result["active"].shape[lp.kRowComponent], 1)))
+            zeroes = mx_util.build(
+                b=np.zeros(shape=result["active"]["b"].shape)
+            )
 
-            pr = lp.LPProblem(
+            # Build the restricted primal
+            restricted_p = lp.LPProblem(
                 objective=lp.LPObjective.MAXIMIZE,
                 c=problem.c,
-                a=result["active"],
-                b= constants,
-                a_signs=lp.init_constraints_signs_to(lp.LPSign.LE, result["active"]),
+                a=result["active"]["a"],
+                b=zeroes,
+                a_signs=lp.init_constraints_signs_to(lp.LPSign.LE, result["active"]["a"]),
                 v_name="csi"
             )
 
-            print(pr)
+            print(restricted_p)
 
-            print("Building restricted dual..\n")
+            # If the restricted dual has no solution, than grow like c * csi = 1
+            # The problem has no solution when there are more columns than rows in a.
+            # Thus we cant compute the inverse of a
+            if restricted_p.a.shape[lp.kColComponent] > restricted_p.a.shape[lp.kRowComponent]:
 
-            print(pr.get_dual(var_name="eta"))
+                print("The restricted dual has no solution, computing growing direction")
 
-            # Build restricted primal
+                # Add cost row to csi matrix
+                i = np.vstack([result["active"]["a"], problem.c])
+                b = np.vstack([np.zeros(shape=result["active"]["b"].shape), [1]])
 
+                # a * csi = 0 & c * csi = 1
+                csi = np.linalg.inv(i).dot(b)
 
+                # After computing csi, grow
+                current = self.grow_onto(
+                    start=current,
+                    direction=csi,
+                    inactive_a=result["inactive"]["a"],
+                    inactive_b=result["inactive"]["b"]
+                )
+
+                # Recompute active constraints
+                result = self.compute_constraints(problem.a, current, problem.b)
+
+            # Otherwise compute growing direction
+            else:
+
+                print("Building restricted dual..\n")
+
+                # Build the restricted dual
+                restricted_d = restricted_p.get_dual(var_name="eta")
+
+                print(restricted_d)
+
+                # Store the inverse since we use it two times and its a heavy task
+                inv_a = np.linalg.inv(restricted_d.a)
+
+                # Compute the solution
+                eta = inv_a.dot(restricted_d.b)
+
+                # Check that is feasible
+                if restricted_d.is_feasible(eta):
+                    # We found the optimal solution
+                    optimal = True
+
+                    print("Optimal solution found: %s" % current)
+
+                # Otherwise compute a growing direction
+                else:
+
+                    print("The restricted dual has an inconsistent solution, computing growing direction..")
+
+                    idx = -1
+                    base = []
+
+                    # Find a base
+                    for component, value in enumerate(eta):
+                        if idx == -1 and not restricted_d.var_signs[component](value, 0):
+                            idx = component
+                            base.append(-1)
+                        else:
+                            base.append(0)
+
+                    base = np.array(base)
+
+                    csi = inv_a.dot(base)
+
+                    # After computing csi, grow
+                    current = self.grow_onto(
+                        start=current,
+                        direction=csi,
+                        inactive_a=result["inactive"]["a"],
+                        inactive_b=result["inactive"]["b"]
+                    )
+
+                    # Recompute active constraints
+                    result = self.compute_constraints(problem.a, current, problem.b)
