@@ -35,7 +35,7 @@ class LPSign(Enum):
         elif sign is LPSign.LE:
             return "<="
         elif sign is LPSign.EQ:
-            return "=="
+            return "="
         elif sign is LPSign.FREE:
             return "free"
 

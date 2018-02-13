@@ -1,5 +1,6 @@
 import lprogramming.model.lproblem as lp
 import lprogramming.solver.simplex as simplex
+import lprogramming.utils.plotter as plt
 
 # First things first: provide a consistent representation of the input
 c = [
@@ -18,9 +19,10 @@ b = [
 ]
 
 start = [
-    [0],
+    [3],
     [0]
 ]
+
 
 # Set signs, in this case all constraints have the same sign.
 # Note: You could set signs manually if you want, just provide a consistent array of LPSigns
@@ -43,6 +45,7 @@ d = p.get_dual()
 # Print the problem in an intuitive way
 print(p)
 print(d)
+
 
 # simplex.solve(p, None)
 solver = simplex.Solver()

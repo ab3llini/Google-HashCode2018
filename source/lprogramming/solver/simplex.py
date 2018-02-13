@@ -2,6 +2,8 @@ import numpy as np
 import lprogramming.model.lproblem as lp
 import lprogramming.utils.matrix as mx_util
 import math
+import lprogramming.utils.plotter as plt
+
 
 
 class UnlimitedSolutionException(Exception):
@@ -80,6 +82,7 @@ class Solver:
     def solve(self, problem, start=None):
 
         optimal = False
+        history = []
 
         print("Solving problem:\n")
         print(problem)
@@ -105,6 +108,8 @@ class Solver:
         # TODO: If a starting point was not given, compute one
         # TODO: Check that the constraints used to compute the starting point are not parallel
 
+        history.append(start)
+
         # Get active constraints
         result = self.compute_constraints(problem.a, start, problem.b)
 
@@ -119,8 +124,7 @@ class Solver:
 
             # Recompute active constraints
             result = self.compute_constraints(problem.a, current, problem.b)
-
-
+            history.append(current)
         else:
             current = start
 
@@ -171,6 +175,8 @@ class Solver:
                 # Recompute active constraints
                 result = self.compute_constraints(problem.a, current, problem.b)
 
+                history.append(current)
+
             # Otherwise compute growing direction
             else:
 
@@ -181,11 +187,8 @@ class Solver:
 
                 print(restricted_d)
 
-                # Store the inverse since we use it two times and its a heavy task
-                inv_a = np.linalg.inv(restricted_d.a)
-
                 # Compute the solution
-                eta = inv_a.dot(restricted_d.b)
+                eta = np.linalg.inv(restricted_d.a).dot(restricted_d.b)
 
                 # Check that is feasible
                 if restricted_d.is_feasible(eta):
@@ -206,13 +209,13 @@ class Solver:
                     for component, value in enumerate(eta):
                         if idx == -1 and not restricted_d.var_signs[component](value, 0):
                             idx = component
-                            base.append(-1)
+                            base.append([-1])
                         else:
-                            base.append(0)
+                            base.append([0])
 
                     base = np.array(base)
 
-                    csi = inv_a.dot(base)
+                    csi = np.linalg.inv(restricted_p.a).dot(base)
 
                     # After computing csi, grow
                     current = self.grow_onto(
@@ -224,3 +227,7 @@ class Solver:
 
                     # Recompute active constraints
                     result = self.compute_constraints(problem.a, current, problem.b)
+
+                    history.append(current)
+
+        plt.plot(problem, history=history)
