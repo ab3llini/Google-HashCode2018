@@ -5,7 +5,6 @@ import math
 import lprogramming.utils.plotter as plt
 
 
-
 class UnlimitedSolutionException(Exception):
     def __init__(self, m): super(m)
 
@@ -179,6 +178,13 @@ class Solver:
 
             # Otherwise compute growing direction
             else:
+
+                # We now may have the same amount rows = cols or rows > cols.
+                # If rows > cols, we must remove some linear dependent constraint
+                if restricted_p.a.shape[lp.kColComponent] < restricted_p.a.shape[lp.kRowComponent]:
+                    # Remove the constraint whose gradient is in the cone produced by the others
+                    #while restricted_p.a.shape[lp.kColComponent] == restricted_p.a.shape[lp.kRowComponent]:
+
 
                 print("Building restricted dual..\n")
 

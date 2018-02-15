@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot(problem, history):
+def plot(problem, history=None):
 
     plt.clf()
 
