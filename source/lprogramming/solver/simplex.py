@@ -183,8 +183,12 @@ class Solver:
                 # If rows > cols, we must remove some linear dependent constraint
                 if restricted_p.a.shape[lp.kColComponent] < restricted_p.a.shape[lp.kRowComponent]:
                     # Remove the constraint whose gradient is in the cone produced by the others
-                    #while restricted_p.a.shape[lp.kColComponent] == restricted_p.a.shape[lp.kRowComponent]:
+                    # while restricted_p.a.shape[lp.kColComponent] == restricted_p.a.shape[lp.kRowComponent]:
+                    print("Not able to eliminate linear dependent constraints. YET.")
 
+
+
+                    return
 
                 print("Building restricted dual..\n")
 
@@ -197,7 +201,7 @@ class Solver:
                 eta = np.linalg.inv(restricted_d.a).dot(restricted_d.b)
 
                 # Check that is feasible
-                if restricted_d.is_feasible(eta):
+                if restricted_d.respects_var_signs(eta):
                     # We found the optimal solution
                     optimal = True
 

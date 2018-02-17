@@ -89,29 +89,35 @@ class LPProblem:
         self.var_signs = v_signs
         self.var_names = v_name
 
+    def respects_var_signs(self, point):
+        try:
+            for i, var in enumerate(self.var_signs):
+                if not self.var_signs[i](point[i][0], 0):
+                    raise Exception("Var sign not respected")
+
+            return True
+        except Exception as e:
+            print("Variable sign check: %s for \n%s" % (e, point))
+            return False
+
+    def respects_constraints_signs(self, point):
+        result_components = np.dot(self.a, point)
+        b_components = self.b
+        try:
+            for component, const in enumerate(b_components):
+                if not self.a_signs[component](result_components[component], const):
+                    raise Exception("Constraint not respected")
+            return True
+        except Exception as e:
+            print("Constraint sign check: %s for \n%s" % (e, point))
+            return False
+
     # Calling this method with an un built point will cause a crash.
     def is_feasible(self, point):
-
         if point.shape[kRowComponent] != self.a.shape[kColComponent]:
             raise Exception("Invalid point shape")
         else:
-            result_components = np.dot(self.a, point)
-            b_components = self.b
-            try:
-                for component, const in enumerate(b_components):
-                    if not self.a_signs[component](result_components[component], const):
-                        raise Exception("Constraint not respected")
-
-                point = point
-
-                for i, var in enumerate(self.var_signs):
-                    if not self.var_signs[i](point[i][0], 0):
-                        raise Exception("Var sign not respected")
-
-                return True
-            except Exception as e:
-                print("Feasibility check: %s for \n%s" % (e, point))
-                return False
+            return self.respects_var_signs(point) and self.respects_var_signs(point)
 
     def get_dual(self, var_name="y"):
 

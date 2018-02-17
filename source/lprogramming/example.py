@@ -11,13 +11,13 @@ a = [
     [1, 0],
     [0, 2],
     [3, 2],
-    [1, 1]
+    [1, 2]
 ]
 b = [
     [4],
     [12],
     [18],
-    [7]
+    [12]
 ]
 
 start = [
@@ -48,7 +48,6 @@ d = p.get_dual()
 print(p)
 print(d)
 
-plt.plot(p)
 
 # simplex.solve(p, None)
 solver = simplex.Solver()
