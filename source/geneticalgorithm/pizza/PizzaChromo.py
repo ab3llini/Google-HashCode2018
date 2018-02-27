@@ -1,5 +1,5 @@
 import math
-
+import numpy as np
 from copy import deepcopy
 
 from source.geneticalgorithm.Chromosome import Chromosome
@@ -7,7 +7,7 @@ import random
 
 class PizzaChromo(Chromosome):
 
-    def __init__(self, lista,nrows,ncols,matr,miningr,maxcells):
+    def __init__(self, lista, nrows, ncols, matr, miningr, maxcells):
         self.slices = len(lista)
         self.sliceslist = lista
         self.ncols = ncols
@@ -15,60 +15,32 @@ class PizzaChromo(Chromosome):
         self.matr = matr
         self.miningr = miningr
         self.maxcells = maxcells
+        self.feasibilitymatrix = np.zeros(shape=[nrows, ncols], dtype=np.uint8)
+        for slice in lista:
+            for i in range(slice[0][0], slice[1][0]+1):
+                for j in range(slice[0][1], slice[1][1]+1):
+                    self.feasibilitymatrix[i][j] = 1
 
     def calculatefitness(self):
-        fit=0
-        for i in range(0, len(self.sliceslist)):
-            fit += (self.sliceslist[i][1]-self.sliceslist[i][0]+1)*(1+self.sliceslist[i][3]-self.sliceslist[i][2])
-        return fit
+        return np.sum(self.feasibilitymatrix)
 
+    def addable(self, slice):
+        portion = self.feasibilitymatrix[slice[0][0]:slice[1][0]+1, slice[0][1]:slice[1][1]+1]
+        return np.sum(portion) == 0
 
     def crossover(self, parent2):
         slicesoff = []
         for i in range(0, len(self.sliceslist)):
             slicesoff.append(deepcopy(self.sliceslist[i]))
         for i in range(0, len(parent2.sliceslist)):
-            slicesoff.append(deepcopy(parent2.sliceslist[i]))
-            if(not self.slicesfeasible(slicesoff)):
-                slicesoff.remove(slicesoff[len(slicesoff)-1])
-        return PizzaChromo(slicesoff,self.nrows,self.ncols,self.matr,self.miningr,self.maxcells)
+            if self.addable(parent2.sliceslist[i]):
+                slicesoff.append(deepcopy(parent2.sliceslist[i]))
+        return PizzaChromo(slicesoff, self.nrows, self.ncols, self.matr, self.miningr, self.maxcells)
 
 
     def slicesfeasible(self, slices):
-        for i in range(0,len(slices)):
-            if slices[i][0]>slices[i][1] or slices[i][2]> slices[i][3]:
-                return False
-            if slices[i][0]>=self.nrows or slices[i][1]>=self.nrows or slices[i][2]>=self.ncols or slices[i][3]>=self.ncols:
-                return False
-            if slices[i][0]<0 or slices[i][1]<0 or slices[i][2]<0 or slices[i][3]<0:
-                return False
-            if (slices[i][3]-slices[i][2]+1)*(1+slices[i][1]-slices[i][0])>self.maxcells:
-                return False
-            sum =0
-            sum2=0
-            for k in range(slices[i][0],slices[i][1]+1):
-                for z in range(slices[i][2],slices[i][3]+1):
-                    sum += self.matr[k][z]
-                    sum2 += 1-self.matr[k][z]
-            if(sum<self.miningr or sum2<self.miningr):
-                return False
-            for j in range(i+1, len(slices)):
-                if slices[j][0]>=slices[i][0] and slices[j][0]<=slices[i][1] and slices[j][2]>=slices[i][2] and slices[j][2]<=slices[i][3]:
-                    return False
-                if slices[j][1]>=slices[i][0] and slices[j][1]<=slices[i][1] and slices[j][3]>=slices[i][2] and slices[j][3]<=slices[i][3]:
-                    return False
-                if slices[j][0]>=slices[i][0] and slices[j][0]<=slices[i][1] and slices[j][3]>=slices[i][2] and slices[j][3]<=slices[i][3]:
-                    return False
-                if slices[j][1]>=slices[i][0] and slices[j][1]<=slices[i][1] and slices[j][2]>=slices[i][2] and slices[j][2]<=slices[i][3]:
-                    return False
-                if slices[j][0]<slices[i][0] and slices[j][0]<slices[i][1] and slices[j][2]<slices[i][2] and slices[j][2]<slices[i][3] and slices[j][1]>slices[i][0] and slices[j][1]>slices[i][1] and slices[j][3]>slices[i][2] and slices[j][3]>slices[i][3]:
-                    return False
-                if slices[j][0]<slices[i][0] and slices[j][1]>slices[i][1] and (slices[j][3]>=slices[i][2] and slices[j][3]<=slices[i][3] or slices[j][2]>=slices[i][2] and slices[j][2]<=slices[i][3]):
-                    return False
-                if slices[j][2]<slices[i][2] and slices[j][3]>slices[i][3] and (slices[j][0]>=slices[i][0] and slices[j][0]<=slices[i][1] or slices[j][1]>=slices[i][0] and slices[j][1]<=slices[i][1]):
-                    return False
-
         return True
+
 
     def mutation(self):
         which=random.uniform(0,1)
@@ -82,9 +54,13 @@ class PizzaChromo(Chromosome):
         lista= deepcopy(self.sliceslist)
         n1 = math.floor(random.uniform(0, self.nrows - 1))
         n2 = math.floor(random.uniform(n1, n1 + self.maxcells))
-        c1 = math.floor(random.uniform(0, self.nrows - 1))
+        c1 = math.floor(random.uniform(0, self.ncols - 1))
         c2 = math.floor(random.uniform(c1, c1 + self.maxcells))
-        lista.append([n1, n2, c1, c2])
+        if not singleslicefeasible([[n1, c1], [n2, c2]], self.maxcells, self.miningr, self.nrows, self.ncols, self.matr):
+            return self
+        if not self.addable([[n1, c1], [n2, c2]]):
+            return self
+        lista.append([[n1, c1], [n2, c2]])
         return PizzaChromo(lista, self.nrows, self.ncols, self.matr, self.miningr, self.maxcells)
 
     def removeslice(self):
@@ -96,24 +72,46 @@ class PizzaChromo(Chromosome):
     def modifyslice(self):
         lista = deepcopy(self.sliceslist)
         mod = math.floor(random.uniform(0, len(lista)))
-        which = math.floor(random.uniform(0, 4))
+        which = math.floor(random.uniform(0, 2))
+        which2 = math.floor(random.uniform(0, 2))
         what = math.floor(random.uniform(-1, 2))
-        lista[mod][which] += what
-        return PizzaChromo(lista,self.nrows,self.ncols,self.matr,self.miningr,self.maxcells)
+        modified = deepcopy(lista[mod])
+        lista.remove(modified)
+        modified[which][which2] += what
+        modif = PizzaChromo(lista,self.nrows,self.ncols,self.matr,self.miningr,self.maxcells)
+        if singleslicefeasible(modified, self.maxcells, self.miningr, self.nrows, self.ncols, self.matr) and modif.addable(modified):
+            lista.append(modified)
+            return PizzaChromo(lista,self.nrows,self.ncols,self.matr,self.miningr,self.maxcells)
+        return self
 
     def feasible(self):
         return self.slicesfeasible(self.sliceslist)
 
-    def randomize(self):
-        done = False
-        while( not done):
-            n1 = math.floor(random.uniform(0, self.nrows - 1))
-            n2 = math.floor(random.uniform(n1, self.nrows))
-            c1 = math.floor(random.uniform(0, self.nrows - 1))
-            c2 = math.floor(random.uniform(c1, self.nrows))
-            lista = [[n1, n2, c1, c2]]
-            if(self.slicesfeasible(lista)):
-                done=True
-                self.sliceslist=lista
-                self.slices = len(lista)
+def randomize(nrows, ncols, matr, miningr, maxcells):
+    while True:
+        n1 = math.floor(random.uniform(0, nrows - 1))
+        n2 = math.floor(random.uniform(n1, ncols))
+        c1 = math.floor(random.uniform(0, ncols - 1))
+        c2 = math.floor(random.uniform(c1, ncols))
+        lista = [[[n1, c1], [n2, c2]]]
+        if singleslicefeasible(lista[0], maxcells, miningr, nrows, ncols, matr):
+            return PizzaChromo(lista, nrows, ncols, matr, miningr, maxcells)
 
+
+def singleslicefeasible(slice, maxcells, miningr, nrows, ncols, matr):
+    sum1 = 0
+    sum2 = 0
+    slice = np.array(slice)
+    if slice[0][0] >= nrows or slice[1][0] >= nrows or slice[0][0] < 0 or slice[1][0] < 0:
+        return False
+    if slice[0][1] >= ncols or slice[1][1] >= ncols or slice[0][1] < 0 or slice[1][1] < 0:
+        return False
+    if (slice[1][0] - slice[0][0] +1) * (slice[1][1] - slice[0][1] +1) > maxcells:
+        return False
+    for i in range(slice[0][0], slice[1][0]):
+        for j in range(slice[0][1], slice[1][1]):
+            sum1 += matr[i][j]
+            sum2 += 1 - matr[i][j]
+    if sum1 < miningr or sum2 < miningr:
+        return False
+    return True

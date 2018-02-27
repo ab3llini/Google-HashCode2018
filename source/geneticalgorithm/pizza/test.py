@@ -1,16 +1,17 @@
 import time
 
 from copy import deepcopy
-
+import source.pizza.reader as r
 import source.geneticalgorithm.geneticalgorithm as lib
-from source.geneticalgorithm.pizza.PizzaChromo import PizzaChromo
+from source.geneticalgorithm.pizza.PizzaChromo import  PizzaChromo
+from scipy import io as scio
 
 """OPERATIONS TO BE DONE AT THE END OF EXECUTION WTH THE FINAL POPULATION"""
 def stop(pop):
     print(pop.getbest().slices)
     print()
-    for i in range(0, len(pop.getbest().sliceslist)):
-        print(pop.getbest().sliceslist[i][0]," ",pop.getbest().sliceslist[i][2]," ",pop.getbest().sliceslist[i][1]," ",pop.getbest().sliceslist[i][3])
+    print(pop.getbest().sliceslist)
+
 
 """READ FROM FILE"""
 f = open("big.in")
@@ -32,20 +33,37 @@ for i in range(0,nrows):
     matr.append(deepcopy(row))
 
 """CREATE INITIAL STARTING LIST OF CHROMOSOMES"""
-list = []
-for i in range(0, 20):
-    c = PizzaChromo([],nrows,ncols,matr, miningr, maxcells)
-    c.randomize()
-    list.append(c)
-for i in range(0,len(list)):
-    print(list[i].slices, " ", list[i].sliceslist)
+
+num = 1
+pop = []
+while num <= 36:
+    lista = scio.loadmat("./../../pizza/solutions/big"+ str(num)+".mat")['slices']
+    lista = lista.tolist()
+    c = PizzaChromo(lista, nrows, ncols, matr, miningr, maxcells)
+    pop.append(c)
+    num += 1
+    if num == 23:
+        num = 25
+
+sol = r.read_problem_solution('big', "673748")
+sol = sol.tolist()
+c = PizzaChromo(sol, nrows, ncols, matr, miningr, maxcells)
+pop.append(c)
+sol = r.read_problem_solution('big', "712438")
+sol = sol.tolist()
+c = PizzaChromo(sol, nrows, ncols, matr, miningr, maxcells)
+pop.append(c)
+sol = r.read_problem_solution('big', "726483")
+sol = sol.tolist()
+c = PizzaChromo(sol, nrows, ncols, matr, miningr, maxcells)
+pop.append(c)
 
 
 
 """EXECUTION OF THE ALGORITHM"""
 start = time.time()
 
-result=lib.execute(list,10,lib.roulettewheelselection,lib.fitepochsend,0.80,0.6,stop,10000, ncols*nrows)
+result=lib.execute(pop,4,lib.roulettewheelselection,lib.fitepochsend,0.80,0.6,stop,10000, ncols*nrows)
 end = time.time()
 
 print((end-start)/60)

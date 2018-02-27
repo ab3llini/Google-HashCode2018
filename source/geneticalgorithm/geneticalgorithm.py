@@ -1,6 +1,8 @@
 import random
 
 from source.geneticalgorithm.Population import Population
+import source.pizza.writer as w
+from concurrent.futures import ThreadPoolExecutor
 
 # **************************END CONDITIONS****************************
 
@@ -110,13 +112,19 @@ def generateOffSpring(newgen, pop, selmethod, crossoverprob, mutationprob):
     offspring = mutation(offspring, mutationprob)
     if offspring.feasible():
         offspring.getfitness()
-        newgen.chromosomes.append(offspring)
-    return newgen
+        # newgen.chromosomes.append(offspring)
+    else:
+        return None
+    return offspring
+
+
+
 
 
 def loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, generations, stop, maxfitness):
     """This is the loop of the algorithm."""
     gen = 0
+    pool = ThreadPoolExecutor(2)
     while True:
         """If condition is satisfied, it stops and returns the best chromosome."""
         if endcondition(gen, generations, pop.getbest().getfitness(), maxfitness):
@@ -126,13 +134,34 @@ def loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, gen
         newgen = applyElitism(Population([]), pop, elitism)
         """Generated new offspring a certain number of times, to have a new generation as numerous as the 
         previous one."""
+        # while newgen.getDimension() < pop.getDimension():
+            # offspring = generateOffSpring(newgen, pop, selmethod, crossoverprob, mutationprob)
+            # if offspring is not None:
+                # newgen.chromosomes.append(offspring)
+
+        def thact():
+            res = None
+            while res is None:
+                res = generateOffSpring(newgen, pop, selmethod, crossoverprob, mutationprob)
+            return res
+
+
         while newgen.getDimension() < pop.getDimension():
-            newgen = generateOffSpring(newgen, pop, selmethod, crossoverprob, mutationprob)
+            fut_offsprings = []
+            for _ in range(4):
+                fut_offsprings.append(pool.submit(thact))
+            off = generateOffSpring(newgen, pop, selmethod, crossoverprob, mutationprob)
+            for idx in range(4):
+                newgen.chromosomes.append(fut_offsprings[idx].result())
+            if off is not None:
+                newgen.chromosomes.append(off)
 
         """Sort the new generation by fitness, decreasing order."""
         newgen.sort()
         """Uses the new generation as current population"""
-        pop = newgen
+        pop.chromosomes = newgen.chromosomes[:pop.getDimension()]
         gen += 1
         print(pop.getbest().getfitness())
+        w.write_solution('big', "sol1", pop.getbest().sliceslist)
+
 
