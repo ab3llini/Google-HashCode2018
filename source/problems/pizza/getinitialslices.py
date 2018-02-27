@@ -4,8 +4,8 @@ import numpy as np
 from scipy import io as scio
 
 
-file = "medium"
-number = "6"
+file = "big"
+number = "10"
 f = open(file + ".in")
 lines=f.readlines()
 nrows = int(lines[0])
@@ -39,8 +39,8 @@ def singleslicefeasible(slice):
     return True
 
 
-kernel_height = 1
-kernel_width = 12
+kernel_height = 14
+kernel_width = 1
 
 kernel_shape = [kernel_height, kernel_width]
 
