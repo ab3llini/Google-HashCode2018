@@ -1,4 +1,5 @@
 from text_parser.parser import *
+from text_parser.resources import *
 
 import os.path as path
 
@@ -6,13 +7,22 @@ import os.path as path
 MUSH = 'M'
 TOM = 'T'
 
+HIGH = 'h'
+LOW = 'l'
+DATA = 'd'
+
+
 def read_problem_instance(fname):
     with Parser(fname) as p:
         r, c, l, h = p.read_line()
         outmat = p.read_matrix(rows=r, cols=c,
-                               column_splitter=lambda s: s.split(),
-                               mapper= lambda e: e)
-        return l, h, outmat
+                               column_splitter=lambda e: list(e),
+                               mapper=lambda e: e)
+        return {
+            LOW: l,
+            HIGH: h,
+            DATA: outmat
+        }
 
 
-print(read_problem_instance())
+print(read_problem_instance(res_path(path.join("datasets", "small.in"))))
