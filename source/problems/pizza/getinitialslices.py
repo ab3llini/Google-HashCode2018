@@ -5,7 +5,7 @@ from scipy import io as scio
 
 
 file = "big"
-number = "8"
+number = "10"
 f = open(file + ".in")
 lines=f.readlines()
 nrows = int(lines[0])
@@ -39,8 +39,8 @@ def singleslicefeasible(slice):
     return True
 
 
-kernel_height = 3
-kernel_width = 4
+kernel_height = 14
+kernel_width = 1
 
 kernel_shape = [kernel_height, kernel_width]
 
@@ -52,7 +52,7 @@ while i < nrows - kernel_height:
     while j < ncols - kernel_width:
         slice = np.array(matr[i:i+kernel_height, j:j+kernel_width])
         if singleslicefeasible(slice):
-            slices.append([[i, j], [i+kernel_height, j+kernel_width]])
+            slices.append([[i, j], [i+kernel_height-1, j+kernel_width-1]])
             number_slices += 1
         j += kernel_width
     i += kernel_height
