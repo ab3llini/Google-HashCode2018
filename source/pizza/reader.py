@@ -32,3 +32,11 @@ def read_problem_solution(id, name):
             a, b, c, d = p.read_line()
             sol.append(np.array([[a, b], [c, d]]))
         return np.array(sol)
+
+
+def read_all_solutions(id):
+    names = get_sol_names_list(id)
+    ret = []
+    for n in names:
+        ret.append(read_problem_solution(id, n))
+    return ret

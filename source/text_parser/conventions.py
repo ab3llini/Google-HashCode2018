@@ -23,3 +23,13 @@ def get_sol(id, name):
 
 def get_in_name(id):
     return id + IN_EXT
+
+
+def get_sol_names_list(id):
+    base = get_dir(id)
+    sols = []
+    for file in os.listdir(base):
+        name, ext = os.path.splitext(file)
+        if ext == SOL_EXT:
+            sols.append(name)
+    return sols
