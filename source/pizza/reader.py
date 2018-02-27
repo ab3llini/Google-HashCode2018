@@ -1,5 +1,6 @@
 from text_parser.parser import *
 from text_parser.resources import *
+from text_parser.conventions import *
 
 import os.path as path
 
@@ -12,7 +13,8 @@ LOW = 'l'
 DATA = 'd'
 
 
-def read_problem_instance(fname):
+def read_problem_instance(id):
+    fname = get_in(id)
     with Parser(fname) as p:
         r, c, l, h = p.read_line()
         outmat = p.read_matrix(rows=r, cols=c,
@@ -23,6 +25,7 @@ def read_problem_instance(fname):
             HIGH: h,
             DATA: outmat
         }
+
 
 
 print(read_problem_instance(res_path(path.join("datasets", "small.in"))))

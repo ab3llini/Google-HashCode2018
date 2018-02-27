@@ -60,13 +60,3 @@ class TextWriter:
             self.write_line(token_matrix[i], separator=column_separator, endline=endrow)
         self.write_line(token_matrix[-1], separator=column_separator, endline=endmat)
 
-
-# now testing...
-fout = os.path.abspath('testout.txt')
-with TextWriter(fout) as tw:
-    tw.write_line([4, 5, 3, 1, -5, 4.5])
-    tw.write_line(['Thi', ' i', ' a ', 'ucce', '', 'ful te', 't'], separator='s', endline='!\n')
-    mat = [[3, 4, 6],
-           ['a', '5', '-'],
-           [0]]
-    tw.write_matrix(mat)
