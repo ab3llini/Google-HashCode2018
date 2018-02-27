@@ -1,9 +1,5 @@
 from text_parser.parser import *
-from text_parser.resources import *
 from text_parser.conventions import *
-
-import os.path as path
-
 
 MUSH = 'M'
 TOM = 'T'
@@ -25,3 +21,14 @@ def read_problem_instance(id):
             HIGH: h,
             DATA: outmat
         }
+
+
+def read_problem_solution(id, name):
+    fname = get_sol(id, name)
+    with Parser(fname) as p:
+        l = p.read_line()[0]
+        sol = []
+        for i in range(l):
+            a, b, c, d = p.read_line()
+            sol.append(np.array([[a, b], [c, d]]))
+        return np.array(sol)
