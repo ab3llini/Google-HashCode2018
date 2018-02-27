@@ -10,4 +10,3 @@ def write_solution(id, name, solution):
         for line in solution:
             tokens = np.reshape(line, (4,))
             tw.write_line(tokens)
-

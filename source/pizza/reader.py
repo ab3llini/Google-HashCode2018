@@ -25,7 +25,3 @@ def read_problem_instance(id):
             HIGH: h,
             DATA: outmat
         }
-
-
-
-print(read_problem_instance(res_path(path.join("datasets", "small.in"))))
