@@ -18,6 +18,7 @@ class Simulation:
 
     def simulate(self):
         while self.time < self.end:
+            pass
 
 
 
@@ -56,7 +57,7 @@ class Car:
         self.ride = ride
 
     def move_towards_point(self, p):
-
+        pass
 
     def simulate(self):
         if self.status is not UNBOUNDED:
