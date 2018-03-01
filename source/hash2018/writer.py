@@ -7,8 +7,8 @@ def write_sol(id, name, sol):
     print(sol)
     with TextWriter(path) as tw:
         for ride in sol:
-            print(ride)
+            # print(ride)
             out = [len(ride)]
             out.extend(ride)
-            print(out)
+            # print(out)
             tw.write_line(out)

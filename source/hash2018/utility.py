@@ -70,11 +70,16 @@ def schedule_car(posstart, tsstart, avrides: list, bonus):
     chrides = []
     uts = [utility(posstart, tsstart, bonus, ride) for ride in avrides]
     chosen = int(np.argmax(uts))
-    while uts[chosen] > 0:
+    chut = uts[chosen]
+    while chut > 0:
         chrides.append(avrides[chosen][0])
         tsstart += get_stats(posstart, tsstart, bonus, avrides[chosen])[1]
         posstart = end_point(avrides[chosen])
         avrides.pop(chosen)
         uts = [utility(posstart, tsstart, bonus, ride) for ride in avrides]
-        chosen = np.argmax(uts)
+        if len(uts) > 0:
+            chosen = np.argmax(uts)
+            chut = uts[chosen]
+        else:
+            chut = 0
     return chrides, avrides

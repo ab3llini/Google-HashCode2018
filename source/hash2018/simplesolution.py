@@ -30,7 +30,6 @@ class Simulation:
 
 class Car:
     def __init__(self):
-        self.id = np.random()
         self.loc = [0, 0]
         self.status = UNBOUNDED
         self.current_ride = None
