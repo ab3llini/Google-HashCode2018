@@ -26,7 +26,7 @@ def read_in(id):
         for idx in range(N):
             ride = p.read_line()
             data.append([idx, [ride[0], ride[1]], [ride[2], ride[3]], [ride[4], ride[5]]])
-        ret[DATA] = np.array(data)
+        ret[DATA] = data
         return ret
 
 
@@ -42,3 +42,6 @@ def read_all_solutions(id):
     for n in names:
         ret.append(read_sol(id, n))
     return ret
+
+
+print(read_in(EXAMPLE))

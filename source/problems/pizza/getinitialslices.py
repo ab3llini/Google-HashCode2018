@@ -4,7 +4,7 @@ import numpy as np
 from scipy import io as scio
 
 
-file = "big"
+file = "highbonus"
 number = 25
 f = open(file + ".in")
 lines=f.readlines()

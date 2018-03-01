@@ -1,10 +1,10 @@
 from text_parser.resources import *
 
 EXAMPLE = 'example'
-SHOULDBEEASY = 'sbe'
-NOHURRY = 'nh'
-METROPOLIS = 'm'
-HIGHBONUS = 'hb'
+SHOULDBEEASY = 'shouldbeeasy'
+NOHURRY = 'nohurry'
+METROPOLIS = 'metropolis'
+HIGHBONUS = 'highbonus'
 
 IN_EXT = ".in"
 SOL_EXT = ".txt"

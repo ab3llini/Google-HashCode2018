@@ -14,7 +14,7 @@ def stop(pop):
 
 
 """READ FROM FILE"""
-f = open("big.in")
+f = open("highbonus.in")
 lines=f.readlines()
 nrows = int(lines[0])
 ncols = int(lines[1])
@@ -37,7 +37,7 @@ for i in range(0,nrows):
 num = 1
 pop = []
 while num <= 36:
-    lista = scio.loadmat("./../../pizza/solutions/big"+ str(num)+".mat")['slices']
+    lista = scio.loadmat("./../../pizza/solutions/highbonus"+ str(num)+".mat")['slices']
     lista = lista.tolist()
     c = PizzaChromo(lista, nrows, ncols, matr, miningr, maxcells)
     pop.append(c)
@@ -45,15 +45,15 @@ while num <= 36:
     if num == 23:
         num = 25
 
-sol = r.read_problem_solution('big', "673748")
+sol = r.read_problem_solution('highbonus', "673748")
 sol = sol.tolist()
 c = PizzaChromo(sol, nrows, ncols, matr, miningr, maxcells)
 pop.append(c)
-sol = r.read_problem_solution('big', "712438")
+sol = r.read_problem_solution('highbonus', "712438")
 sol = sol.tolist()
 c = PizzaChromo(sol, nrows, ncols, matr, miningr, maxcells)
 pop.append(c)
-sol = r.read_problem_solution('big', "726483")
+sol = r.read_problem_solution('highbonus', "726483")
 sol = sol.tolist()
 c = PizzaChromo(sol, nrows, ncols, matr, miningr, maxcells)
 pop.append(c)
