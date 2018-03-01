@@ -27,7 +27,7 @@ class HashChromo(Chromosome):
 
 
     def crossover(self, parent2):
-        ts_split = random.uniform(0, SIMTIME)
+        ts_split = random.uniform(0, SIMTIME -2 )
         new_sched = crossoverfun(self.sol, parent2.sol, ts_split, self.ridesdict[DATA])
         nc = HashChromo(new_sched, self.ridesdict)
         if nc.feasible():
@@ -35,10 +35,8 @@ class HashChromo(Chromosome):
         return self
 
 
-
     def mutation(self):
-        pass #must returns chromo
-
+        return self
 
 
     def perctime(self, ride):
