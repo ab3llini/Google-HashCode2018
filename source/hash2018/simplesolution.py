@@ -19,13 +19,18 @@ class Simulation:
         self.rides = data[DATA]
 
     def simulate(self):
-        while self.time < self.end:
-            for car in self.cars:
+        while self.time < self.end and len(self.rides) > 0:
+            print("CURRENT TIME = %s" % self.time)
+            for i, car in enumerate(self.cars):
+                print("SIMULATING CAR #%s" % i)
                 car.simulate(self.time, self.rides)
+                self.time = self.time + 1
+
 
 
 class Car:
     def __init__(self):
+        self.id = np.random()
         self.loc = [0, 0]
         self.status = UNBOUNDED
         self.current_ride = None
@@ -84,10 +89,19 @@ class Car:
             self.status = UNBOUNDED
 
     def simulate(self, time, rides):
+
+        if len(rides) == 0:
+            return
+
         if self.status is not UNBOUNDED:
+
+            print("Current loc = %s" % self.loc)
+
             if self.status is REACHING_RIDE:
+                print("Moving towards ride %s..." % (start_point(self.current_ride)))
                 self.move_towards_point(start_point(self.current_ride))
             else:
+                print("Executing ride...")
                 self.move_towards_point(end_point(self.current_ride))
 
         else:
@@ -100,10 +114,13 @@ class Car:
                     best_idx = i
                     best_utility = utility
 
-            print("Best utility = %s" % utility)
-
+            print("Best utility = %s" % best_utility)
             self.current_ride = rides.pop(best_idx)
+            self.status = REACHING_RIDE
 
 
 s = Simulation()
 s.simulate()
+
+for car in s.cars:
+    print("history = %s" % car.history)
