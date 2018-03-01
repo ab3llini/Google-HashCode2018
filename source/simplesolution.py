@@ -26,7 +26,7 @@ class Car:
         if (ridestart - time) < distance:
             return 0
         else:
-            t3 = np.abs(ride[2][0] - ride[1][0]) + np.abs(ride[1][1] - ride[1][1])
+            gain = np.abs(ride[2][0] - ride[1][0]) + np.abs(ride[1][1] - ride[1][1])
 
 
 cars = [Car()] * data[FLEET]
