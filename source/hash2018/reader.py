@@ -42,6 +42,3 @@ def read_all_solutions(id):
     for n in names:
         ret.append(read_sol(id, n))
     return ret
-
-
-print(read_in(EXAMPLE))
