@@ -1,10 +1,13 @@
 import numpy as np
 from hash2018.reader import *
+from hash2018.writer import *
 from hash2018.utility import *
+import random
 
 
-data = read_in(EXAMPLE)
+data = read_in(SHOULDBEEASY)
 
+BONUS = data[BONUS]
 
 UNBOUNDED = "0"
 REACHING_RIDE = "1"
@@ -15,21 +18,28 @@ class Simulation:
 
         self.time = 0
         self.end = data[SIMTIME]
-        self.cars = [Car()] * data[FLEET]
+
+        self.cars = []
+        for i in range(data[FLEET]):
+            self.cars.append(Car())
         self.rides = data[DATA]
+
+        #print("Number of cars = %d", len(self.cars))
 
     def simulate(self):
         while self.time < self.end and len(self.rides) > 0:
-            print("CURRENT TIME = %s" % self.time)
+            #print("CURRENT TIME = %s" % self.time)
             for i, car in enumerate(self.cars):
-                print("SIMULATING CAR #%s" % i)
+                #print("SIMULATING CAR #%s" % i)
                 car.simulate(self.time, self.rides)
-                self.time = self.time + 1
+
+            self.time = self.time + 1
 
 
 
 class Car:
     def __init__(self):
+        self.id = random.randint(1,101)
         self.loc = [0, 0]
         self.status = UNBOUNDED
         self.current_ride = None
@@ -80,9 +90,12 @@ class Car:
 
         # If we got here we reached the point
         if self.status is REACHING_RIDE:
+            #print("%s ::: Ride reached, Current loc = %s" % (self.id, self.loc))
             self.status = EXECUTING_RIDE
+            return
 
         if self.status is EXECUTING_RIDE:
+            #print("%s ::: Ride executed" % (self.id))
             self.history.append(self.current_ride)
             self.current_ride = None
             self.status = UNBOUNDED
@@ -94,13 +107,13 @@ class Car:
 
         if self.status is not UNBOUNDED:
 
-            print("Current loc = %s" % self.loc)
+            #print("%s ::: Current loc = %s" % (self.id, self.loc))
 
             if self.status is REACHING_RIDE:
-                print("Moving towards ride %s..." % (start_point(self.current_ride)))
+                #print("%s ::: Moving towards ride %s..." % (self.id, start_point(self.current_ride)))
                 self.move_towards_point(start_point(self.current_ride))
             else:
-                print("Executing ride...")
+                #print("%s ::: Executing ride..." % self.id)
                 self.move_towards_point(end_point(self.current_ride))
 
         else:
@@ -108,18 +121,33 @@ class Car:
             best_idx = 0
             best_utility = 0
             for i, ride in enumerate(rides):
-                utility = self.utility(ride, time)
-                if utility > best_utility:
+                u = utility(self.loc, time, BONUS, ride)
+                if u > best_utility:
                     best_idx = i
-                    best_utility = utility
+                    best_utility = u
 
-            print("Best utility = %s" % best_utility)
+            #print("%s ::: Best utility = %s" % (self.id, best_utility))
             self.current_ride = rides.pop(best_idx)
+
+            #print("%s ::: Assigned ride #%s" % (self.id, best_idx))
             self.status = REACHING_RIDE
+            self.simulate(time, rides)
 
 
 s = Simulation()
 s.simulate()
 
+
+#print("Computing solution:")
+
+sol = []
+
 for car in s.cars:
-    print("history = %s" % car.history)
+    res = []
+    for ride in car.history:
+        res.append(ride[0])
+    sol.append(res)
+
+write_sol(EXAMPLE, "albi2", sol)
+
+
