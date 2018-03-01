@@ -75,6 +75,7 @@ def takes_bonus(posstart, tstart, ride):
         return True
     return False
 
+
 def schedule_car(posstart, tsstart, avrides: list, bonus):
     avrides = avrides[:]
     chrides = []
