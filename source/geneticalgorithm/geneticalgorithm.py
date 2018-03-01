@@ -124,7 +124,8 @@ def generateOffSpring(newgen, pop, selmethod, crossoverprob, mutationprob):
 def loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, generations, stop, maxfitness):
     """This is the loop of the algorithm."""
     gen = 0
-    pool = ThreadPoolExecutor(2)
+    thread_pool_dim = 4
+    pool = ThreadPoolExecutor(thread_pool_dim)
     while True:
         """If condition is satisfied, it stops and returns the best chromosome."""
         if endcondition(gen, generations, pop.getbest().getfitness(), maxfitness):
@@ -148,10 +149,10 @@ def loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, gen
 
         while newgen.getDimension() < pop.getDimension():
             fut_offsprings = []
-            for _ in range(4):
+            for _ in range(thread_pool_dim):
                 fut_offsprings.append(pool.submit(thact))
             off = generateOffSpring(newgen, pop, selmethod, crossoverprob, mutationprob)
-            for idx in range(4):
+            for idx in range(thread_pool_dim):
                 newgen.chromosomes.append(fut_offsprings[idx].result())
             if off is not None:
                 newgen.chromosomes.append(off)
@@ -162,6 +163,6 @@ def loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, gen
         pop.chromosomes = newgen.chromosomes[:pop.getDimension()]
         gen += 1
         print(pop.getbest().getfitness())
-        w.write_solution('big', "sol1", pop.getbest().sliceslist)
+
 
 
