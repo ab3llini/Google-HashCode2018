@@ -21,12 +21,14 @@ def compatible(ride1, ride2):
 set = conventions.HIGHBONUS
 
 data = reader.read_in(set)
+data_copy = reader.read_in(set)
 
 ncars = data[reader.FLEET]
 
 ris = []
 
 rides = data[reader.DATA]
+rides_copy = data_copy[reader.DATA]
 nrides = len(rides)
 used = np.zeros([nrides])
 for _ in range(ncars):
@@ -34,13 +36,13 @@ for _ in range(ncars):
     first = True
     for i in range(nrides):
         if used[i] == 0 and first:
-            if reachableasfirst(rides[i]):
+            if reachableasfirst(rides[rides_copy[i][0]]):
                 carsol.append(i)
                 used[i] = 1
                 first = False
         else:
             if used[i] == 0 and not first:
-                if compatible(rides[carsol[len(carsol)-1]], rides[i]):
+                if compatible(rides[carsol[len(carsol)-1]], rides[rides_copy[i][0]]):
                     carsol.append(i)
                     used[i] = 1
     ris.append(carsol)
