@@ -11,4 +11,5 @@ def crossoverfun(sched1, sched2, ts_split, ridesdata):
         car = sched2[i]
         for ind in car:
             if ridesdata[ind][3][1] >= ts_split:
-                newsched[car].append(ind)
+                newsched[i].append(ind)
+    return newsched

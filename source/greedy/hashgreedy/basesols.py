@@ -3,7 +3,6 @@ from hash2018 import writer
 from text_parser import conventions
 from random import *
 import numpy as np
-from tqdm import tqdm
 
 def perctime(ride):
     return abs(ride[2][0] - ride[1][0]) + abs(ride[2][1] - ride[1][1])
@@ -11,6 +10,9 @@ def perctime(ride):
 
 def percasstart(ride):
     return ride[1][0] + ride[1][1]
+
+def bonusnotfirst(ride1, ride2):
+    return abs(ride1[2][0]-ride2[1][0]) + abs(ride1[2][1]-ride2[1][1]) < ride2[3][0]
 
 
 def reachableasfirst(ride):
@@ -33,28 +35,49 @@ def main(n):
 
     rides = data[reader.DATA]
     rides_copy = data_copy[reader.DATA]
-    np.random.shuffle(rides_copy)
     nrides = len(rides)
     used = np.zeros([nrides])
+    times = np.zeros([ncars])
+    max_time = data[reader.SIMTIME]
+    carnum = 0
     for _ in range(ncars):
         carsol = []
         first = True
         for i in range(nrides):
-            if used[i] == 0 and first:
-                if reachableasfirst(rides[rides_copy[i][0]]):
-                    carsol.append(i)
-                    used[i] = 1
-                    first = False
-            else:
-                if used[i] == 0 and not first:
-                    if compatible(rides[carsol[len(carsol)-1]], rides[rides_copy[i][0]]):
+            if times[carnum] < max_time:
+                if used[i] == 0 and first:
+                    if reachableasfirst(rides[rides_copy[i][0]]):
                         carsol.append(i)
                         used[i] = 1
+                        first = False
+                        times[carnum] = max([rides[rides_copy[carsol[i]][0]][3][1] for i in range(len(carsol))])
+                else:
+                    if used[i] == 0 and not first:
+                        nparrides = len(carsol)
+                        for ridesolind in range(nparrides):
+                            if nparrides == 1:
+                                if compatible(rides[carsol[ridesolind]], rides[rides_copy[i][0]]):
+                                    carsol.append(i)
+                                    used[i] = 1
+                                    times[carnum] = max([rides[rides_copy[carsol[i]][0]][3][1] for i in range(len(carsol))])
+                            else:
+                                if ridesolind != nparrides - 1:
+                                    if bonusnotfirst(rides[carsol[ridesolind]], rides[rides_copy[i][0]]) and \
+                                            bonusnotfirst(rides[rides_copy[i][0]], rides[carsol[ridesolind +1]]):
+                                        carsol.append(i)
+                                        used[i] = 1
+                                        times[carnum] = max([rides[rides_copy[carsol[i]][0]][3][1] for i in range(len(carsol))])
+                                else:
+                                    if compatible(rides[carsol[ridesolind]], rides[rides_copy[i][0]]):
+                                        carsol.append(i)
+                                        used[i] = 1
+                                        times[carnum] = max(
+                                            [rides[rides_copy[carsol[i]][0]][3][1] for i in range(len(carsol))])
         ris.append(carsol)
+        carnum += 1
 
     writer.write_sol(set, "highbonfirst" + str(n), ris)
 
 
 if __name__ == '__main__':
-    for i in tqdm(range(25)):
-        main(i)
+    main(102)
