@@ -1,12 +1,13 @@
 from text_parser.resources import *
 
 EXAMPLE = 'example'
-SMALL = 'small'
-MEDIUM = 'medium'
-BIG = 'big'
+SHOULDBEEASY = 'sbe'
+NOHURRY = 'nh'
+METROPOLIS = 'm'
+HIGHBONUS = 'hb'
 
 IN_EXT = ".in"
-SOL_EXT = ".sol"
+SOL_EXT = ".txt"
 
 
 def get_dir(id):
