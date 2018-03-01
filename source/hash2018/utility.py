@@ -65,6 +65,16 @@ def utility(posstart, tstart, bonus, ride):
     return (bns + ttrav)/(ttr + ttrav + wait)
 
 
+def takes_bonus(posstart, tstart, ride):
+    ttr = manhattan_dist(posstart, start_point(ride))
+    ttrav = travtime(ride)
+    if tstart + ttr + ttrav >= end_time(ride):
+        return False
+    wait = start_time(ride) - tstart - ttrav
+    if wait >= 0:
+        return True
+    return False
+
 def schedule_car(posstart, tsstart, avrides: list, bonus):
     avrides = avrides[:]
     chrides = []
