@@ -32,8 +32,14 @@ def read_in(id):
 
 def read_sol(id, name):
     path = get_sol(id, name)
+    sol = []
     with Parser(path) as p:
-        pass
+        tokens = (0,)
+        while len(tokens) != 0:
+            tokens = p.read_line()
+            if len(tokens) != 0:
+                sol.append(np.array(tokens[1:]))
+    return np.array(sol)
 
 
 def read_all_solutions(id):
