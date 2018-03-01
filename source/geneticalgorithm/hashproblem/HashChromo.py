@@ -10,7 +10,7 @@ class HashChromo(Chromosome):
         self.sol = np.array(sol)
         self.checked = np.ones([len(sol)], dtype=np.uint8)
         self.ridesdict = ridesdict
-        self.bonusachieved = np.zeros(self.sol.shape, dtype=np.uint8)
+        self.bonusachieved = np.zeros([len(ridesdict[DATA])], dtype=np.uint8)
         self.assignedride = np.zeros([self.ridesdict[RIDES]])
         for car in self.sol:
             for ind in car:
@@ -22,12 +22,12 @@ class HashChromo(Chromosome):
         rides = self.ridesdict[DATA]
         for car in self.sol:
             for ind in car:
-                fitness += rides[car]
+                fitness += self.perctime(rides[ind])
         return fitness
 
 
     def crossover(self, parent2):
-        ts_split = random.uniform(0, SIMTIME -2 )
+        ts_split = random.uniform(0, self.ridesdict[SIMTIME] - 2 )
         new_sched = crossoverfun(self.sol, parent2.sol, ts_split, self.ridesdict[DATA])
         nc = HashChromo(new_sched, self.ridesdict)
         if nc.feasible():
@@ -67,11 +67,11 @@ class HashChromo(Chromosome):
                 if not self.reachableasfirst(ride):
                     return False
                 if self.bonusfirst(ride):
-                    self.bonusachieved[j][0] = 1
+                    self.bonusachieved[ride[0]] = 1
                 rnum = len(car)
                 for i in range(0, rnum-1):
                     if not self.compatible(rides[car[i]], rides[car[i+1]]):
                         return False
                     if self.bonusnotfirst(rides[car[i]], rides[car[i+1]]):
-                        self.bonusachieved[j][i+1] = 1
+                        self.bonusachieved[ride[0]] = 1
         return True

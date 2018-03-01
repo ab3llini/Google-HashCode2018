@@ -1,7 +1,7 @@
 import random
-
+from text_parser import conventions
 from source.geneticalgorithm.Population import Population
-import source.pizza.writer as w
+import source.hash2018.writer as w
 from concurrent.futures import ThreadPoolExecutor
 
 # **************************END CONDITIONS****************************
@@ -163,6 +163,7 @@ def loop(pop, elitism, selmethod, endcondition, crossoverprob, mutationprob, gen
         pop.chromosomes = newgen.chromosomes[:pop.getDimension()]
         gen += 1
         print(pop.getbest().getfitness())
+        w.write_sol(conventions.HIGHBONUS, str(pop.getbest().getfitness()),pop.getbest().sol)
 
 
 
