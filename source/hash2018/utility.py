@@ -79,7 +79,7 @@ def takes_bonus(posstart, tstart, ride):
 def schedule_car(posstart, tsstart, avrides: list, bonus, norm=True):
     avrides = avrides[:]
     chrides = []
-    uts = [utility(posstart, tsstart, bonus, ride) for ride in avrides if norm or takes_bonus(posstart, tsstart, ride)]
+    uts = [utility(posstart, tsstart, bonus, ride) for ride in avrides]
     chosen = int(np.argmax(uts))
     chut = uts[chosen]
     while chut > 0:
@@ -87,7 +87,9 @@ def schedule_car(posstart, tsstart, avrides: list, bonus, norm=True):
         tsstart += get_stats(posstart, tsstart, bonus, avrides[chosen])[1]
         posstart = end_point(avrides[chosen])
         avrides.pop(chosen)
-        uts = [utility(posstart, tsstart, bonus, ride) for ride in avrides if norm or takes_bonus(posstart, tsstart, ride)]
+        if not norm:
+            return chrides, avrides
+        uts = [utility(posstart, tsstart, bonus, ride) for ride in avrides]
         if len(uts) > 0:
             chosen = np.argmax(uts)
             chut = uts[chosen]
