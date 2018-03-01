@@ -37,7 +37,19 @@ def get_stats(posstart, tstart, bonus, ride):
         bns = bonus
     else:
         wait = 0
-    return (bns + ttrav), (ttr + ttrav + wait), flag
+    return (bns + ttrav) if flag else 0, (ttr + ttrav + wait), flag
+
+
+def get_end_stats(schedule, bonus):
+    pos = [0, 0]
+    ts = 0
+    pts = 0
+    for ride in schedule:
+        p, ts, _ = get_stats(pos, ts, bonus, ride)
+        pos = end_point(ride)
+        pts += p
+    return pos, ts, pts
+
 
 def utility(posstart, tstart, bonus, ride):
     ttr = manhattan_dist(posstart, start_point(ride))
