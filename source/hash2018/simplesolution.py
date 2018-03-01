@@ -12,20 +12,21 @@ class Simulation:
         self.time = start
         self.end = end
 
-    def
+    def simulate(self):
+        while self.time < self.end:
+
 
 
 class Car:
     def __init__(self):
-        self.x = 0
-        self.y = 0
+        self.loc = [0, 0]
 
     def __str__(self):
         return "x=%d, y=%s" % (self.x, self.y)
 
     def utility(self, ride, now):
 
-        timetoreach = np.abs(ride[1][0] - self.x) + np.abs(ride[1][1] - self.y)
+        timetoreach = manhattan_dist(ride[1], self.loc)
         ridestart = start_time(ride)
 
         bonus = 0
@@ -43,11 +44,4 @@ class Car:
         timetotravel = gain
 
         return (gain + bonus) / (timetoreach + timetowait + timetotravel)
-
-
-
-
-for car in cars:
-    print(car)
-print(rides)
 
