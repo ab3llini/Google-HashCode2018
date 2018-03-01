@@ -55,7 +55,7 @@ class HashChromo(Chromosome):
         return abs(ride1[2][0]-ride2[1][0]) + abs(ride1[2][1]-ride2[1][1]) < ride2[3][0]
 
     def compatible(self, ride1, ride2):
-        return abs(ride1[2][0]-ride2[1][0]) + abs(ride1[2][1]-ride2[1][1]) + self.perctime(ride2) < ride2[3][1]
+        return ride1[3][1] + abs(ride1[2][0]-ride2[1][0]) + abs(ride1[2][1]-ride2[1][1]) + self.perctime(ride2) < ride2[3][1]
 
     def feasible(self):
         rides = self.ridesdict[DATA]
